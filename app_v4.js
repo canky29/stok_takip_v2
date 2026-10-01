@@ -1597,6 +1597,21 @@ window.deleteProduct = (id) => {
 
 
 window.renderProducts = () => {
+    let prods = JSON.parse(localStorage.getItem('products') || '[]');
+    let allCats = JSON.parse(localStorage.getItem('categories') || '[]');
+    
+    // Auto-repair missing categories from products
+    let catModified = false;
+    prods.forEach(p => {
+        if (p.category && !allCats.includes(p.category)) {
+            allCats.push(p.category);
+            catModified = true;
+        }
+    });
+    if (catModified) {
+        localStorage.setItem('categories', JSON.stringify(allCats));
+    }
+    
     updateDashboard();
     const container = document.getElementById('products-container');
     if(!container) return;
@@ -1608,8 +1623,6 @@ window.renderProducts = () => {
         }
     });
     
-    let prods = JSON.parse(localStorage.getItem('products') || '[]');
-    const allCats = JSON.parse(localStorage.getItem('categories') || '[]');
     container.innerHTML = '';
     
     // Apply stock filter
