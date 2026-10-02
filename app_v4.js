@@ -2201,9 +2201,19 @@ window.onCustomerProductSelect = () => {
 
 window.previewCustImageFile = (input) => {
     if (input.files && input.files[0]) {
+        var file = input.files[0];
+        if(file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+            showToast('HEIC/iPhone formatı desteklenmiyor. Lütfen normal JPG/PNG seçin.', 'error');
+            input.value = '';
+            return;
+        }
         var reader = new FileReader();
         reader.onload = function (e) {
             var img = new Image();
+            img.onerror = function() {
+                showToast('Görsel okunamadı. Farklı bir format deneyin.', 'error');
+                input.value = '';
+            };
             img.onload = function() {
                 var canvas = document.createElement('canvas');
                 var ctx = canvas.getContext('2d');
@@ -2220,7 +2230,7 @@ window.previewCustImageFile = (input) => {
             };
             img.src = e.target.result;
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     }
 };
 
@@ -2461,7 +2471,7 @@ const _renderCustOrderGrid = (container, list, isActive) => {
             
             <!-- Hero Image -->
             <div class="relative w-full h-48 bg-stone-50 shrink-0 group border-b border-stone-100">
-                ${o.imgUrl ? 
+                ${(o.imgUrl && (o.imgUrl.startsWith('http') || o.imgUrl.startsWith('data:image/'))) ? 
                     `<img src="${o.imgUrl}" class="w-full h-full object-cover cursor-zoom-in" onclick="window.openLightboxModalForOrder(${o.id})">
                      <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-transparent to-transparent pointer-events-none"></div>` 
                     : 
