@@ -366,6 +366,24 @@
                     </div>
                 </div>
 
+                                <!-- Excel Raporları Card -->
+                <div onclick="setRole('EXCEL')" class="group md:col-span-2 xl:col-span-4 bg-stone-900 p-7 rounded-3xl border border-stone-800 shadow-md hover:shadow-2xl hover:border-amber-500/50 transition-all duration-300 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="flex items-start md:items-center gap-5 flex-col md:flex-row">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-500 text-stone-900 flex items-center justify-center font-black group-hover:bg-amber-400 transition duration-300 shadow-sm shrink-0">
+                            <i data-lucide="file-spreadsheet" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-white mb-1 group-hover:text-amber-400 transition">Excel Raporları <span class="text-xs bg-rose-500 text-white px-2 py-0.5 rounded ml-2 align-middle">Yönetici Özel</span></h3>
+                            <p class="text-stone-400 text-sm font-medium leading-relaxed max-w-2xl">
+                                Kasa, açık hesaplar ve stok sayım listelerini Excel dosyası olarak anında bilgisayarınıza indirin.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-2 md:mt-0 pt-5 md:pt-0 border-t md:border-t-0 md:border-l border-stone-700 md:pl-6 flex items-center justify-between md:flex-col md:items-end gap-3 shrink-0">
+                        <span class="text-sm font-black text-amber-500 flex items-center gap-1 group-hover:translate-x-1 transition">Paneli Aç <i data-lucide="arrow-right" class="w-4 h-4"></i></span>
+                    </div>
+                </div>
+
                 <!-- Toptancı & Cari Hesap Card -->
                 <div onclick="setRole('B2B')" class="group md:col-span-2 xl:col-span-4 bg-white p-7 rounded-3xl border border-stone-200/80 shadow-md hover:shadow-2xl hover:border-blue-500/50 transition-all duration-300 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div class="flex items-start md:items-center gap-5 flex-col md:flex-row">
@@ -604,6 +622,62 @@
         </div>
 
         <!-- ANALYTICS & WASTAGE VIEW -->
+                <!-- EXCEL PANEL -->
+        <div id="view-excel" class="hidden animate-fade-in flex-col gap-6 max-w-5xl mx-auto w-full pb-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+                <div>
+                    <h2 class="text-4xl font-black text-stone-900 tracking-tight flex items-center gap-3">
+                        <i data-lucide="file-spreadsheet" class="w-10 h-10 text-amber-600"></i> Excel Raporları
+                    </h2>
+                    <p class="text-stone-500 font-bold mt-2">Sistemdeki tüm verileri Excel dökümü olarak indirin.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Kasa Raporu -->
+                <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+                            <i data-lucide="receipt" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-stone-800 mb-2">Günlük Gider & Kasa</h3>
+                        <p class="text-sm text-stone-500 font-medium mb-6">Tüm toptancı ödemeleri, personel avansları ve günlük giderlerin listesi.</p>
+                    </div>
+                    <button onclick="downloadExcelExpenses()" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Excel'i İndir
+                    </button>
+                </div>
+
+                <!-- Açık Hesap Raporu -->
+                <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-stone-800 mb-2">Açık Hesap (Veresiye)</h3>
+                        <p class="text-sm text-stone-500 font-medium mb-6">Tüm açık hesap müşterileri, güncel borç limitleri ve son tahsilat bilgileri.</p>
+                    </div>
+                    <button onclick="downloadExcelReceivables()" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Excel'i İndir
+                    </button>
+                </div>
+
+                <!-- Stok Sayım Raporu -->
+                <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4">
+                            <i data-lucide="package" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-stone-800 mb-2">Stok Sayım Listesi</h3>
+                        <p class="text-sm text-stone-500 font-medium mb-6">Vitrin ve hammadde envanterinin boş stok sütunuyla hazırlanmış sayım dökümü.</p>
+                    </div>
+                    <button onclick="downloadExcelInventory()" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Excel'i İndir
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div id="view-analytics" class="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-12" style="display: none;">
             
             <!-- HEADER BAR -->

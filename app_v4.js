@@ -724,7 +724,8 @@ window.submitAuth = (e) => {
         'RECEIVABLES': ['receivablesPassword', 'adminPassword'],
         'EXPENSES': ['expensesPassword', 'adminPassword'],
         'PERSONNEL': ['personnelPassword', 'adminPassword'],
-        'B2B': ['b2bPassword', 'adminPassword']
+        'B2B': ['b2bPassword', 'adminPassword'],
+        'EXCEL': ['adminPassword']
     };
     
     // Check specific action auth (e.g. Teslim Et)
@@ -1804,7 +1805,8 @@ window.setRole = (role, bypassAuth = false) => {
         'RECEIVABLES': ['receivablesPassword', 'adminPassword'],
         'EXPENSES': ['expensesPassword', 'adminPassword'],
         'PERSONNEL': ['personnelPassword', 'adminPassword'],
-        'B2B': ['b2bPassword', 'adminPassword']
+        'B2B': ['b2bPassword', 'adminPassword'],
+        'EXCEL': ['adminPassword']
     };
 
     if(!bypassAuth && (role.startsWith('ACTION_') || rolePasswords[role])) {
@@ -1815,6 +1817,7 @@ window.setRole = (role, bypassAuth = false) => {
         if (role === 'UPPER' || role === 'ACTION_UPPER' || role === 'LOWER' || role === 'ORDERS') desc = "Bu bölüme erişmek için Modüller şifresi (veya Yönetici şifresi) gereklidir.";
         if (role === 'ACTION_ADMIN') desc = "Bu işlem için Yönetici şifresi gereklidir.";
         if (role === 'ACTION_REVEAL') desc = "Bu işlem için Yönetici şifresi gereklidir.";
+        if (role === 'EXCEL') desc = 'Bu bölüme erişmek için Yönetici şifresi gereklidir.';
         if (['INVENTORY', 'ANALYTICS', 'FINANCE', 'RECIPE', 'RECEIVABLES', 'EXPENSES', 'PERSONNEL', 'B2B'].includes(role)) desc = "Bu bölüme erişmek için yetkili şifresi gereklidir.";
         
         const descEl = document.getElementById('auth-modal-desc');
@@ -1825,7 +1828,7 @@ window.setRole = (role, bypassAuth = false) => {
         return;
     }
 
-    const roles = ['HOME', 'UPPER', 'LOWER', 'ORDERS', 'ANALYTICS', 'RECEIVABLES', 'INVENTORY', 'FINANCE', 'RECIPE', 'PERSONNEL', 'B2B', 'EXPENSES'];
+    const roles = ['HOME', 'EXCEL', 'UPPER', 'LOWER', 'ORDERS', 'ANALYTICS', 'RECEIVABLES', 'INVENTORY', 'FINANCE', 'RECIPE', 'PERSONNEL', 'B2B', 'EXPENSES'];
     roles.forEach(r => {
         const viewEl = document.getElementById('view-' + r.toLowerCase());
         const btnEl = document.getElementById('btn-role-' + r.toLowerCase());
@@ -4341,4 +4344,71 @@ window.deleteExpense = (id) => {
         window.closeConfirmModal();
         window.showToast("Gider silindi.", "success");
     });
+};
+
+
+// ==================== EXCEL EXPORT LOGIC ====================
+window.downloadCSV = function(filename, csvData) {
+    const blob = new Blob(["\ufeff", csvData], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+};
+
+window.downloadExcelExpenses = function() {
+    let records = JSON.parse(localStorage.getItem('expenses') || '[]');
+    let csv = "Tarih,Açıklama,Tip,Tutar (TL)\n";
+    let total = 0;
+    records.forEach(r => {
+        csv += `${r.date},"${r.desc}",${r.type},${r.amount}\n`;
+        total += parseFloat(r.amount);
+    });
+    csv += `,,TOPLAM:,${total}\n`;
+    downloadCSV("Kasa_Gider_Raporu.csv", csv);
+    showToast("Kasa & Gider Raporu indirildi.", "success");
+};
+
+window.downloadExcelReceivables = function() {
+    let records = JSON.parse(localStorage.getItem('receivables') || '[]');
+    let csv = "Müşteri Adı,Güncel Borç (TL),Son Tahsilat Tarihi,Açıklama\n";
+    let total = 0;
+    records.forEach(r => {
+        let lastDate = "-";
+        if(r.history && r.history.length > 0) {
+            let tahsilatlar = r.history.filter(h => h.amount < 0).sort((a,b) => b.id - a.id);
+            if(tahsilatlar.length > 0) lastDate = new Date(tahsilatlar[0].id).toLocaleDateString('tr-TR');
+        }
+        csv += `"${r.name}",${r.balance},${lastDate},"${r.note || ''}"\n`;
+        total += parseFloat(r.balance);
+    });
+    csv += `TOPLAM:,${total},,\n`;
+    downloadCSV("Acik_Hesap_Alacaklar.csv", csv);
+    showToast("Açık Hesap (Veresiye) Raporu indirildi.", "success");
+};
+
+window.downloadExcelInventory = function() {
+    let prods = JSON.parse(localStorage.getItem('products') || '[]');
+    let csv = "Kategori,Ürün Adı,Satış Fiyatı (TL),Sistemdeki Stok,Gerçek Stok (Sayım)\n";
+    
+    // Sort by category then name
+    prods.sort((a,b) => (a.category||'').localeCompare(b.category||'') || a.name.localeCompare(b.name));
+    
+    prods.forEach(p => {
+        csv += `"${p.category || 'Diğer'}","${p.name}",${p.price},${p.stock},\n`;
+    });
+    
+    csv += `\n,,,,,\n`;
+    csv += `HAMMADDE ENVANTERİ,,,,,\n`;
+    let raw = JSON.parse(localStorage.getItem('rawMaterials') || '[]');
+    raw.sort((a,b) => a.name.localeCompare(b.name));
+    raw.forEach(r => {
+        csv += `Hammadde,"${r.name}",${r.cost},${r.stock} ${r.unit},\n`;
+    });
+    
+    downloadCSV("Stok_Sayim_Listesi.csv", csv);
+    showToast("Stok Sayım Listesi indirildi.", "success");
 };
