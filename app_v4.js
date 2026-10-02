@@ -1857,6 +1857,9 @@ window.setRole = (role, bypassAuth = false) => {
         selectedBtn.classList.add('bg-amber-600', 'text-white');
     }
     
+    if((role === 'UPPER' || role === 'LOWER' || role === 'HOME') && window.renderProducts) {
+        window.renderProducts();
+    }
     if(role === 'ORDERS' && window.renderCustomerOrders) {
         window.renderCustomerOrders();
     }
