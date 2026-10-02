@@ -2978,6 +2978,7 @@ window.renderInventory = () => {
     
     let html = '';
     if(window.renderInventoryRequests) window.renderInventoryRequests();
+    if(window.renderCriticalStockPanel) window.renderCriticalStockPanel();
     
     let cats = getInvCategories();
     let uncatItems = displayList.filter(r => !r.category);
@@ -4563,4 +4564,53 @@ window.clearInventoryRequest = (id, actionType) => {
         showToast('Sipariş verildi olarak işaretlendi.', 'success');
     }
     renderInventoryRequests();
+};
+
+
+window.renderCriticalStockPanel = () => {
+    const panel = document.getElementById('inventory-critical-panel');
+    if(!panel) return;
+    
+    if(!window.isAdmin) {
+        panel.classList.add('hidden');
+        return;
+    }
+    
+    let inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+    let criticalItems = inventory.filter(r => r.critical && parseFloat(r.amount) <= parseFloat(r.critical));
+    
+    if(criticalItems.length === 0) {
+        panel.classList.add('hidden');
+        return;
+    }
+    
+    panel.classList.remove('hidden');
+    let html = `
+    <div class="bg-rose-50 border border-rose-200 rounded-[2rem] p-6 mb-2 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-200 text-rose-700 flex items-center justify-center font-black shadow-sm">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 animate-pulse"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black text-rose-900 tracking-tight">Kritik Stok Uyarısı</h3>
+                    <p class="text-xs font-bold text-rose-700">${criticalItems.length} adet ürün belirlenen kritik seviyenin altına düşmüş!</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+    `;
+    
+    criticalItems.forEach(item => {
+        html += `
+            <div class="bg-white border border-rose-100 rounded-xl py-2 px-3 flex items-center gap-2 shadow-sm">
+                <span class="text-sm font-black text-stone-800">${item.name}</span>
+                <span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">${item.amount} ${item.unit} (Sınır: ${item.critical})</span>
+            </div>
+        `;
+    });
+    
+    html += `</div></div>`;
+    panel.innerHTML = html;
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
