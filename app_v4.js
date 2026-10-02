@@ -2489,9 +2489,12 @@ const _renderCustOrderGrid = (container, list, isActive) => {
                 <!-- Customer Info -->
                 <div class="flex flex-col">
                     <h3 class="text-2xl font-black text-stone-800 tracking-tight leading-none mb-2">${o.customerName}</h3>
-                    <a href="tel:${o.customerPhone}" class="text-sm text-stone-500 font-bold flex items-center gap-1.5 hover:text-amber-600 transition w-max">
-                        <i data-lucide="phone-call" class="w-4 h-4"></i> ${o.customerPhone}
-                    </a>
+                    <div class="flex items-center gap-3 mt-1">
+                        <a href="tel:${o.customerPhone}" class="text-sm text-stone-500 font-bold flex items-center gap-1.5 hover:text-amber-600 transition w-max">
+                            <i data-lucide="phone-call" class="w-4 h-4"></i> ${o.customerPhone}
+                        </a>
+                        ${isActive && o.customerPhone ? `<a href="https://wa.me/90${o.customerPhone.replace(/[^0-9]/g, '').slice(-10)}?text=${encodeURIComponent('Sayın ' + o.customerName + ', siparişiniz hazırlanmıştır, dilediğiniz zaman fırınımızdan teslim alabilirsiniz. Bizi tercih ettiğiniz için teşekkür ederiz. (Patuli Fırın)')}" target="_blank" class="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 hover:bg-green-600 hover:text-white transition"><i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp</a>` : ''}
+                    </div>
                 </div>
                 
                 <!-- Order Content & Pricing (Invoice Style) -->
@@ -4361,20 +4364,20 @@ window.downloadCSV = function(filename, csvData) {
 
 window.downloadExcelExpenses = function() {
     let records = JSON.parse(localStorage.getItem('expenses') || '[]');
-    let csv = "Tarih,Açıklama,Tip,Tutar (TL)\n";
+    let csv = "Tarih;Açıklama;Tip;Tutar (TL)\n";
     let total = 0;
     records.forEach(r => {
-        csv += `${r.date},"${r.desc}",${r.type},${r.amount}\n`;
+        csv += `${r.date};"${r.desc}";${r.type};${r.amount}\n`;
         total += parseFloat(r.amount);
     });
-    csv += `,,TOPLAM:,${total}\n`;
+    csv += `;;TOPLAM:;${total}\n`;
     downloadCSV("Kasa_Gider_Raporu.csv", csv);
     showToast("Kasa & Gider Raporu indirildi.", "success");
 };
 
 window.downloadExcelReceivables = function() {
     let records = JSON.parse(localStorage.getItem('receivables') || '[]');
-    let csv = "Müşteri Adı,Güncel Borç (TL),Son Tahsilat Tarihi,Açıklama\n";
+    let csv = "Müşteri Adı;Güncel Borç (TL);Son Tahsilat Tarihi;Açıklama\n";
     let total = 0;
     records.forEach(r => {
         let lastDate = "-";
@@ -4382,31 +4385,31 @@ window.downloadExcelReceivables = function() {
             let tahsilatlar = r.history.filter(h => h.amount < 0).sort((a,b) => b.id - a.id);
             if(tahsilatlar.length > 0) lastDate = new Date(tahsilatlar[0].id).toLocaleDateString('tr-TR');
         }
-        csv += `"${r.name}",${r.balance},${lastDate},"${r.note || ''}"\n`;
+        csv += `"${r.name}";${r.balance};${lastDate};"${r.note || ''}"\n`;
         total += parseFloat(r.balance);
     });
-    csv += `TOPLAM:,${total},,\n`;
+    csv += `TOPLAM:;${total};;\n`;
     downloadCSV("Acik_Hesap_Alacaklar.csv", csv);
     showToast("Açık Hesap (Veresiye) Raporu indirildi.", "success");
 };
 
 window.downloadExcelInventory = function() {
     let prods = JSON.parse(localStorage.getItem('products') || '[]');
-    let csv = "Kategori,Ürün Adı,Satış Fiyatı (TL),Sistemdeki Stok,Gerçek Stok (Sayım)\n";
+    let csv = "Kategori;Ürün Adı;Satış Fiyatı (TL);Sistemdeki Stok;Gerçek Stok (Sayım)\n";
     
     // Sort by category then name
     prods.sort((a,b) => (a.category||'').localeCompare(b.category||'') || a.name.localeCompare(b.name));
     
     prods.forEach(p => {
-        csv += `"${p.category || 'Diğer'}","${p.name}",${p.price},${p.stock},\n`;
+        csv += `"${p.category || 'Diğer'}";"${p.name}";${p.price};${p.stock};\n`;
     });
     
-    csv += `\n,,,,,\n`;
-    csv += `HAMMADDE ENVANTERİ,,,,,\n`;
+    csv += `\n;;;;;\n`;
+    csv += `HAMMADDE ENVANTERİ;;;;;\n`;
     let raw = JSON.parse(localStorage.getItem('rawMaterials') || '[]');
     raw.sort((a,b) => a.name.localeCompare(b.name));
     raw.forEach(r => {
-        csv += `Hammadde,"${r.name}",${r.cost},${r.stock} ${r.unit},\n`;
+        csv += `Hammadde;"${r.name}";${r.cost};${r.stock} ${r.unit};\n`;
     });
     
     downloadCSV("Stok_Sayim_Listesi.csv", csv);
