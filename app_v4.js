@@ -2464,6 +2464,10 @@ const _renderCustOrderGrid = (container, list, isActive) => {
     let html = '';
     list.sort((a,b) => b.id - a.id).forEach(o => {
         const dateStr = o.date ? new Date(o.date).toLocaleDateString('tr-TR') : '';
+        let waText = `Sayın ${o.customerName};\nSipariş etmiş olduğunuz "${o.productName}"`;
+        if (o.cakeContent) waText += ` (${o.cakeContent})`;
+        waText += ` özenle hazırlanmıştır. Dilediğiniz zaman fırınımızdan teslim alabilirsiniz.\n\nBizi tercih ettiğiniz için teşekkür ederiz. Afiyet olsun! 🎂\n\n📍 Patuli Fırın (Yol Tarifi):\nhttps://maps.app.goo.gl/seQ3CBUSapuYzooy8`;
+
         
         html += `
         <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-stone-100 flex flex-col relative overflow-hidden transition duration-300">
@@ -2503,7 +2507,7 @@ const _renderCustOrderGrid = (container, list, isActive) => {
                         <a href="tel:${o.customerPhone}" class="text-sm text-stone-500 font-bold flex items-center gap-1.5 hover:text-amber-600 transition w-max">
                             <i data-lucide="phone-call" class="w-4 h-4"></i> ${o.customerPhone}
                         </a>
-                        ${isActive && o.customerPhone ? `<a href="https://wa.me/90${o.customerPhone.replace(/[^0-9]/g, '').slice(-10)}?text=${encodeURIComponent('Sayın ' + o.customerName + ', siparişiniz hazırlanmıştır, dilediğiniz zaman fırınımızdan teslim alabilirsiniz. Bizi tercih ettiğiniz için teşekkür ederiz. (Patuli Fırın)')}" target="_blank" class="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 hover:bg-green-600 hover:text-white transition"><i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp</a>` : ''}
+                        ${isActive && o.customerPhone ? `<a href="https://wa.me/90${o.customerPhone.replace(/[^0-9]/g, '').slice(-10)}?text=${encodeURIComponent(waText)}" target="_blank" class="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 hover:bg-green-600 hover:text-white transition"><i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp</a>` : ''}
                     </div>
                 </div>
                 
