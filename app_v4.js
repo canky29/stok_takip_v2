@@ -2467,9 +2467,9 @@ const _renderCustOrderGrid = (container, list, isActive) => {
     let html = '';
     list.sort((a,b) => b.id - a.id).forEach(o => {
         const dateStr = o.date ? new Date(o.date).toLocaleDateString('tr-TR') : '';
-        let waText = `Sayın ${o.customerName};\nSipariş etmiş olduğunuz "${o.productName}"`;
+        let waText = `Sayın ${o.customerName},\nSipariş etmiş olduğunuz ${o.productName}`;
         if (o.cakeContent) waText += ` (${o.cakeContent})`;
-        waText += ` özenle hazırlanmıştır. Dilediğiniz zaman fırınımızdan teslim alabilirsiniz.\n\nBizi tercih ettiğiniz için teşekkür ederiz. Afiyet olsun! 🎂\n\n📍 Patuli Fırın (Yol Tarifi):\nhttps://maps.app.goo.gl/seQ3CBUSapuYzooy8`;
+        waText += ` özenle hazırlanmıştır. Dilediğiniz zaman fırınımızdan veya işletmemizden teslim alabilirsiniz.\n\nFırın iletişim numarası: +90 551 726 53 53\nFırının konumu: https://maps.app.goo.gl/5mfXWVdFp6vxaio3A`;
 
         
         html += `
