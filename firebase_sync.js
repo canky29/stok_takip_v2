@@ -22,7 +22,7 @@ const SYNC_KEYS = [
     'adminPassword', 'modulesPassword', 'inventoryPassword', 'analyticsPassword',
     'financePassword', 'recipePassword', 'receivablesPassword', 'expensesPassword',
     'personnelPassword', 'b2bPassword', 'personnel_records', 'settings',
-    'receivables', 'suppliers', 'invCategories', 'financeDeletePassword', 'siteAccessPassword'
+    'receivables', 'suppliers', 'invCategories', 'financeDeletePassword', 'siteAccessPassword', 'inventoryRequests'
 ];
 
 function triggerRender() {

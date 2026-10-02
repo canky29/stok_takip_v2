@@ -2975,6 +2975,7 @@ window.renderInventory = () => {
     }
     
     let html = '';
+    if(window.renderInventoryRequests) window.renderInventoryRequests();
     
     let cats = getInvCategories();
     let uncatItems = displayList.filter(r => !r.category);
@@ -3019,6 +3020,9 @@ window.renderInventory = () => {
                 <button onclick="updateInventoryAmount(${r.id}, 1)" class="w-10 h-10 rounded-xl bg-stone-50 border border-stone-200 text-stone-600 font-bold text-lg hover:bg-stone-100 transition flex items-center justify-center shrink-0">+</button>
                 <div class="flex-1"></div>
                 
+                <button onclick="openInventoryRequestModal(${r.id})" class="h-10 px-4 rounded-xl text-amber-500 hover:text-amber-700 hover:bg-amber-50 transition flex items-center gap-2 font-bold text-sm shrink-0" title="Yöneticiden Sipariş Talep Et">
+                    <i data-lucide="bell" class="w-4 h-4"></i> Talep
+                </button>
                 <button onclick="openInventoryModal(${r.id})" class="h-10 px-4 rounded-xl text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition flex items-center gap-2 font-bold text-sm shrink-0">
                     <i data-lucide="edit-2" class="w-4 h-4"></i> Düzenle
                 </button>
@@ -4431,4 +4435,111 @@ window.downloadExcelInventory = function() {
     
     downloadCSV("Stok_Sayim_Listesi.csv", csv);
     showToast("Stok Sayım Listesi indirildi.", "success");
+};
+
+
+window.renderInventoryRequests = () => {
+    const panel = document.getElementById('inventory-requests-panel');
+    if(!panel) return;
+    
+    let reqs = JSON.parse(localStorage.getItem('inventoryRequests') || '[]');
+    if(reqs.length === 0) {
+        panel.classList.add('hidden');
+        panel.innerHTML = '';
+        return;
+    }
+    
+    panel.classList.remove('hidden');
+    let html = `
+    <div class="bg-amber-50 border border-amber-200 rounded-[2rem] p-6 mb-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-amber-200 text-amber-700 flex items-center justify-center font-black shadow-sm">
+                <i data-lucide="bell-ring" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-black text-amber-900 tracking-tight">Personel Talepleri (Ham Madde)</h3>
+                <p class="text-xs font-bold text-amber-700">Yöneticiden sipariş edilmesi istenen ürünler</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    `;
+    
+    let inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+    
+    reqs.forEach(req => {
+        const item = inventory.find(i => i.id == req.inventoryId);
+        const itemName = item ? item.name : 'Silinmiş Ürün';
+        const dateStr = new Date(req.date).toLocaleString('tr-TR', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+        
+        html += `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-100 flex flex-col gap-3 relative overflow-hidden group">
+            <div class="flex items-start justify-between">
+                <div>
+                    <div class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1"><i data-lucide="clock" class="w-3 h-3 inline"></i> ${dateStr}</div>
+                    <div class="text-lg font-black text-stone-800">${itemName}</div>
+                </div>
+            </div>
+            ${req.note ? `<div class="bg-stone-50 border border-stone-200 rounded-xl p-3 text-sm font-bold text-stone-600">"${req.note}"</div>` : ''}
+            
+            <button onclick="clearInventoryRequest(${req.id})" class="mt-auto w-full py-2.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-black transition flex items-center justify-center gap-2">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i> Sipariş Verildi (Kapat)
+            </button>
+        </div>
+        `;
+    });
+    
+    html += `</div></div>`;
+    panel.innerHTML = html;
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+window.openInventoryRequestModal = (invId) => {
+    document.getElementById('inv-req-id').value = invId;
+    document.getElementById('inv-req-note').value = '';
+    
+    const m = document.getElementById('inventory-request-modal');
+    m.classList.remove('hidden');
+    setTimeout(() => {
+        m.firstElementChild.classList.remove('scale-95', 'opacity-0');
+        m.firstElementChild.classList.add('scale-100', 'opacity-100');
+        document.getElementById('inv-req-note').focus();
+    }, 10);
+};
+
+window.closeInventoryRequestModal = () => {
+    const m = document.getElementById('inventory-request-modal');
+    m.firstElementChild.classList.remove('scale-100', 'opacity-100');
+    m.firstElementChild.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => m.classList.add('hidden'), 300);
+};
+
+window.saveInventoryRequest = () => {
+    const invId = document.getElementById('inv-req-id').value;
+    const note = document.getElementById('inv-req-note').value.trim();
+    
+    let reqs = JSON.parse(localStorage.getItem('inventoryRequests') || '[]');
+    reqs.push({
+        id: Date.now(),
+        inventoryId: invId,
+        note: note,
+        date: new Date().toISOString()
+    });
+    localStorage.setItem('inventoryRequests', JSON.stringify(reqs));
+    
+    closeInventoryRequestModal();
+    showToast('Sipariş talebi yöneticiye iletildi.', 'success');
+    renderInventoryRequests();
+};
+
+window.clearInventoryRequest = (id) => {
+    // Sadece admin yetkisi varsa kapatabilsin (veya herkes kapatabilir mi? Müşteri siparişlerindeki gibi genel tutabiliriz, ama action callback ile koruyalım)
+    window.pendingRole = 'ACTION_ADMIN';
+    window.pendingActionCallback = () => {
+        let reqs = JSON.parse(localStorage.getItem('inventoryRequests') || '[]');
+        reqs = reqs.filter(r => r.id !== id);
+        localStorage.setItem('inventoryRequests', JSON.stringify(reqs));
+        showToast('Talep listenden kaldırıldı.', 'success');
+        renderInventoryRequests();
+    };
+    window.setRole('ACTION_ADMIN');
 };
