@@ -40,10 +40,10 @@ window.importDatabase = (input) => {
 };
 
 
-// --- QUOTA FIX AGGRESSIVE ---
+// --- DEPOLAMA KOTASI DÜZELTMESİ ---
 (function() {
     try {
-        // Nuke all base64 images from inventory
+        // Envanterdeki tüm base64 resim verilerini sil
         const inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
         let modified = false;
         inventory.forEach(item => {
@@ -56,12 +56,12 @@ window.importDatabase = (input) => {
             localStorage.setItem('inventory', JSON.stringify(inventory));
         }
         
-        // Nuke all base64 images from products
+        // Ürünlerdeki tüm base64 resim verilerini sil
         const prods = JSON.parse(localStorage.getItem('products') || '[]');
         let pmod = false;
         prods.forEach(item => {
             if (item.image && item.image.startsWith('data:image')) {
-                item.image = ''; // Reset to default or empty
+                item.image = ''; // Boş veya varsayılan değere sıfırla
                 pmod = true;
             }
         });
@@ -75,7 +75,7 @@ window.importDatabase = (input) => {
 // -----------------
 
 
-// PERSONNEL & EXPENSES LOGIC
+// PERSONEL VE GİDER İŞLEMLERİ
 window.openPersonnelModal = () => {
     document.getElementById('personnel-modal').classList.remove('hidden');
     document.getElementById('personnel-name').value = '';
@@ -293,10 +293,10 @@ window.renderPersonnelRecords = () => {
     
     let records = JSON.parse(localStorage.getItem('personnel_records') || '[]');
     
-    // Sort descending by date
+    // Tarihe göre yeniden eskiye doğru sırala
     records.sort((a,b) => new Date(b.date) - new Date(a.date));
     
-    // Populate filter dropdown if empty
+    // Filtre menüsü boşsa doldur
     if(filterMonth.options.length <= 1) {
         let months = new Set();
         records.forEach(r => {
@@ -381,7 +381,7 @@ window.renderPersonnelRecords = () => {
         if(titleSupplier) titleSupplier.innerText = 'Toplam Dış Gider (Tedarikçi)';
     }
     
-    // Update home stat (all time count)
+    // Ana sayfadaki istatistiği güncelle
     if(homeStat) {
         const allRecords = JSON.parse(localStorage.getItem('personnel_records') || '[]');
         homeStat.innerText = `${allRecords.length} Avans / Gider`;
@@ -450,7 +450,7 @@ window.deleteInvCategory = (cat) => {
         let updated = false;
         inventory.forEach(r => {
             if(r.category === cat) {
-                r.category = ""; // make it uncategorized
+                r.category = ""; // Kategorize edilmemiş olarak işaretle
                 updated = true;
             }
         });
@@ -477,17 +477,17 @@ window.submitNewInvCategory = () => {
         newCat = newCat.trim();
         let cats = getInvCategories();
         
-        // Case-insensitive check
+        // Büyük/küçük harf duyarsız kontrol
         const exists = cats.find(c => c.toLowerCase() === newCat.toLowerCase());
         
         if(!exists || exists === window.editingInvCategory) {
             if(window.editingInvCategory) {
-                // UPDATE MODE
+                // GÜNCELLEME (DÜZENLEME) MODU
                 const idx = cats.indexOf(window.editingInvCategory);
                 if(idx > -1) cats[idx] = newCat;
                 localStorage.setItem('invCategories', JSON.stringify(cats));
                 
-                // Update products in inventory
+                // Envanterdeki ürünleri güncelle
                 let inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
                 let updated = false;
                 inventory.forEach(r => {
@@ -502,7 +502,7 @@ window.submitNewInvCategory = () => {
                 
                 showToast("Kategori güncellendi!", "success");
             } else {
-                // CREATE MODE
+                // YENİ OLUŞTURMA MODU
                 cats.push(newCat);
                 localStorage.setItem('invCategories', JSON.stringify(cats));
                 showToast("Yeni kategori başarıyla eklendi!", "success");
@@ -518,7 +518,7 @@ window.submitNewInvCategory = () => {
         showToast("Lütfen bir kategori adı girin.", "error");
     }
 };
-// Bind enter key on input
+// Klavyedeki Enter tuşuna basılmasını algıla
 document.addEventListener('DOMContentLoaded', () => {
     const catInput = document.getElementById('new-category-input');
     if(catInput) {
@@ -639,16 +639,16 @@ window.toggleAuthMode = (mode) => {
 
 
 window.openPasswordManager = () => {
-    // Clear fields
+    // Girdi alanlarını temizle
     document.getElementById('change-old-password').value = '';
     document.getElementById('change-new-password').value = '';
     document.getElementById('change-new-password-confirm').value = '';
     
-    // Switch view
+    // Sayfa/Görünüm değiştir
     document.getElementById('auth-login-view').classList.add('hidden');
     document.getElementById('auth-change-view').classList.remove('hidden');
     
-    // Open modal
+    // Açılır pencereyi (Modal) göster
     openModal('auth-modal');
     setTimeout(() => document.getElementById('change-old-password').focus(), 100);
 };
@@ -728,7 +728,7 @@ window.submitAuth = (e) => {
         'EXCEL': ['adminPassword']
     };
     
-    // Check specific action auth (e.g. Teslim Et)
+    // Özel yetki kontrolü yap (Örn: Teslim Et)
     if (pendingRole === 'ACTION_UPPER') {
         const adminP = localStorage.getItem('adminPassword') || '1234';
         const upperP = localStorage.getItem('modulesPassword') || '1111';
@@ -786,7 +786,7 @@ window.submitAuth = (e) => {
         if (!actualPass) {
              if (key === 'adminPassword') actualPass = '1234';
              else if (key === 'modulesPassword') actualPass = '1111';
-             else actualPass = '2222'; // All new module passwords default to 2222
+             else actualPass = '2222'; // Yeni eklenen modüllerin şifresi standart 2222'dir
         }
         if (pass === actualPass) {
             matched = true;
@@ -841,14 +841,14 @@ window.submitAuth = (e) => {
 };
 
 
-// --- TOAST NOTIFICATIONS ---
+// --- EKRANDA ÇIKAN BİLDİRİM MESAJLARI (TOAST) ---
 window.showToast = (message, type = 'success') => {
     const container = document.getElementById('toast-container');
     if(!container) return;
     
     const toast = document.createElement('div');
     
-    // Style variations based on type
+    // Bildirim türüne göre renk ve ikon seçimi
     let bgClass = 'bg-stone-900 text-white';
     let icon = '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>';
     
@@ -862,7 +862,7 @@ window.showToast = (message, type = 'success') => {
 
     toast.className = `flex items-center gap-3 px-6 py-4 rounded-full shadow-2xl transform transition-all duration-500 translate-y-[-20px] opacity-0 ${bgClass}`;
     
-    // Preserve line breaks for messages with 
+    // Mesajlardaki alt satıra geçme (Enter) kısımlarını koru 
 
     const formattedMessage = message.replace(/\n/g, '<br>');
     
@@ -875,13 +875,13 @@ window.showToast = (message, type = 'success') => {
     
     if(typeof lucide !== 'undefined') lucide.createIcons();
     
-    // Animate in
+    // Ekrana giriş animasyonunu başlat
     requestAnimationFrame(() => {
         toast.classList.remove('translate-y-[-20px]', 'opacity-0');
         toast.classList.add('translate-y-0', 'opacity-100');
     });
     
-    // Animate out and remove
+    // Ekrandan çıkış animasyonunu başlat ve sil
     setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
         toast.classList.add('translate-y-[-20px]', 'opacity-0');
@@ -934,7 +934,7 @@ window.updateDashboard = () => {
     const e3 = document.getElementById('stat-critical-products'); if(e3) e3.textContent = criticalCount;
     const e4 = document.getElementById('stat-urgent-requests'); if(e4) e4.textContent = orders.length;
 
-    // Home view specific cards
+    // Ana sayfaya özel kart tasarımları
     const h1 = document.getElementById('home-stat-products'); if(h1) h1.innerHTML = prods.length + ' Ürün';
     const h2 = document.getElementById('home-stat-critical'); if(h2) h2.innerHTML = criticalCount + ' Kritik';
     const h3 = document.getElementById('home-stat-orders'); if(h3) h3.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> ' + orders.length + ' Bekleyen Talep';
@@ -1601,7 +1601,7 @@ window.renderProducts = () => {
     let prods = JSON.parse(localStorage.getItem('products') || '[]');
     let allCats = JSON.parse(localStorage.getItem('categories') || '[]');
     
-    // Auto-repair missing categories from products
+    // Ürünlerde olup listede olmayan kategorileri otomatik onar
     let catModified = false;
     prods.forEach(p => {
         if (p.category && !allCats.includes(p.category)) {
@@ -2434,12 +2434,12 @@ window.renderCustomerOrders = () => {
     const activeOrders = orders.filter(o => o.status === 'ACTIVE');
     const delivOrders = orders.filter(o => o.status === 'DELIVERED');
     
-    // update stats
+    // istatistikleri güncelle
     document.getElementById('stat-active-customer-orders').textContent = activeOrders.length;
     document.getElementById('stat-delivered-customer-orders').textContent = delivOrders.length;
     document.getElementById('stat-total-customer-orders').textContent = orders.length;
     
-    // update revenue
+    // geliri güncelle
     const totalRevenue = delivOrders.reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
     document.getElementById('stat-delivered-revenue').textContent = window.isFinanceRevealed ? (totalRevenue + ' ₺') : '***** ₺';
     
@@ -2642,7 +2642,7 @@ window.renderReceivables = () => {
     let allReceivables = JSON.parse(localStorage.getItem('receivables') || '[]');
     const search = (document.getElementById('receivable-search')?.value || '').toLowerCase();
     
-    // update stats
+    // istatistikleri güncelle
     const activeDebts = allReceivables.filter(r => !r.paid);
     const paidDebts = allReceivables.filter(r => r.paid);
     
