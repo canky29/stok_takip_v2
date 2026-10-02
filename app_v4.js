@@ -765,6 +765,7 @@ window.submitAuth = (e) => {
     if (pendingRole === 'ACTION_ADMIN') {
         const adminP = localStorage.getItem('adminPassword') || '1234';
         if (pass === adminP) {
+            window.isAdmin = true;
             closeAuthModal();
             showToast('Yetki onaylandı.', 'success');
             if (window.pendingActionCallback) {
@@ -790,6 +791,7 @@ window.submitAuth = (e) => {
         }
         if (pass === actualPass) {
             matched = true;
+            window.isAdmin = (key === 'adminPassword');
             break;
         }
     }
@@ -4443,7 +4445,7 @@ window.renderInventoryRequests = () => {
     if(!panel) return;
     
     let reqs = JSON.parse(localStorage.getItem('inventoryRequests') || '[]');
-    if(reqs.length === 0) {
+    if(reqs.length === 0 || !window.isAdmin) {
         panel.classList.add('hidden');
         panel.innerHTML = '';
         return;
@@ -4476,14 +4478,22 @@ window.renderInventoryRequests = () => {
             <div class="flex items-start justify-between">
                 <div>
                     <div class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1"><i data-lucide="clock" class="w-3 h-3 inline"></i> ${dateStr}</div>
-                    <div class="text-lg font-black text-stone-800">${itemName}</div>
+                    <div class="text-lg font-black text-stone-800 flex items-center gap-2">
+                        ${itemName}
+                        <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-black uppercase tracking-wider border border-amber-200">${req.amount || '1'} ${item ? item.unit : ''}</span>
+                    </div>
                 </div>
             </div>
             ${req.note ? `<div class="bg-stone-50 border border-stone-200 rounded-xl p-3 text-sm font-bold text-stone-600">"${req.note}"</div>` : ''}
             
-            <button onclick="clearInventoryRequest(${req.id})" class="mt-auto w-full py-2.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-black transition flex items-center justify-center gap-2">
-                <i data-lucide="check-circle-2" class="w-4 h-4"></i> Sipariş Verildi (Kapat)
-            </button>
+            <div class="grid grid-cols-2 gap-2 mt-auto">
+                <button onclick="clearInventoryRequest(${req.id}, 'cancel')" class="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-black transition flex items-center justify-center gap-1.5 border border-rose-100 text-[11px]">
+                    <i data-lucide="x" class="w-4 h-4"></i> İptal Et
+                </button>
+                <button onclick="clearInventoryRequest(${req.id}, 'approve')" class="w-full py-2.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-black transition flex items-center justify-center gap-1.5 border border-emerald-200 text-[11px]">
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i> Sipariş Geç
+                </button>
+            </div>
         </div>
         `;
     });
@@ -4496,6 +4506,15 @@ window.renderInventoryRequests = () => {
 window.openInventoryRequestModal = (invId) => {
     document.getElementById('inv-req-id').value = invId;
     document.getElementById('inv-req-note').value = '';
+    const amtInput = document.getElementById('inv-req-amount');
+    if (amtInput) amtInput.value = '1';
+    
+    let inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+    let item = inventory.find(i => i.id == invId);
+    let unitSpan = document.getElementById('inv-req-unit');
+    if(item && unitSpan) {
+        unitSpan.textContent = item.unit || 'ADET';
+    }
     
     const m = document.getElementById('inventory-request-modal');
     m.classList.remove('hidden');
@@ -4516,11 +4535,14 @@ window.closeInventoryRequestModal = () => {
 window.saveInventoryRequest = () => {
     const invId = document.getElementById('inv-req-id').value;
     const note = document.getElementById('inv-req-note').value.trim();
+    const amtInput = document.getElementById('inv-req-amount');
+    const amount = amtInput ? amtInput.value : '1';
     
     let reqs = JSON.parse(localStorage.getItem('inventoryRequests') || '[]');
     reqs.push({
         id: Date.now(),
         inventoryId: invId,
+        amount: amount,
         note: note,
         date: new Date().toISOString()
     });
@@ -4531,15 +4553,14 @@ window.saveInventoryRequest = () => {
     renderInventoryRequests();
 };
 
-window.clearInventoryRequest = (id) => {
-    // Sadece admin yetkisi varsa kapatabilsin (veya herkes kapatabilir mi? Müşteri siparişlerindeki gibi genel tutabiliriz, ama action callback ile koruyalım)
-    window.pendingRole = 'ACTION_ADMIN';
-    window.pendingActionCallback = () => {
-        let reqs = JSON.parse(localStorage.getItem('inventoryRequests') || '[]');
-        reqs = reqs.filter(r => r.id !== id);
-        localStorage.setItem('inventoryRequests', JSON.stringify(reqs));
-        showToast('Talep listenden kaldırıldı.', 'success');
-        renderInventoryRequests();
-    };
-    window.setRole('ACTION_ADMIN');
+window.clearInventoryRequest = (id, actionType) => {
+    let reqs = JSON.parse(localStorage.getItem('inventoryRequests') || '[]');
+    reqs = reqs.filter(r => r.id !== id);
+    localStorage.setItem('inventoryRequests', JSON.stringify(reqs));
+    if (actionType === 'cancel') {
+        showToast('Personel talebi reddedildi ve silindi.', 'error');
+    } else {
+        showToast('Sipariş verildi olarak işaretlendi.', 'success');
+    }
+    renderInventoryRequests();
 };
