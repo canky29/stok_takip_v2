@@ -4833,6 +4833,11 @@ window.openTareModalForProduct = (id) => {
     document.getElementById('tare-product-unit').textContent = p.unit.toUpperCase();
     document.getElementById('tare-product-id').value = p.id;
     
+    let unitSpan = document.getElementById('tare-net-result-unit');
+    if(unitSpan) {
+        unitSpan.textContent = p.unit.toLowerCase() === 'kg' ? 'Kg' : 'Gr';
+    }
+    
     document.getElementById('tare-empty-weight').value = '';
     document.getElementById('tare-gross-weight').value = '';
     document.getElementById('tare-net-result').textContent = '0';
@@ -4856,7 +4861,13 @@ window.calcTareNet = () => {
         netEl.classList.add('text-rose-600');
         btn.disabled = true;
     } else {
-        const net = parseFloat((gross - empty).toFixed(2));
+        let net = parseFloat((gross - empty).toFixed(2));
+        
+        let unit = document.getElementById('tare-product-unit').textContent.trim().toLowerCase();
+        if (unit === 'kg') {
+            net = (net / 1000).toFixed(3);
+        }
+        
         netEl.textContent = net;
         netEl.classList.remove('text-rose-600');
         btn.disabled = false;
@@ -4878,20 +4889,18 @@ window.submitTareForm = (e) => {
         return;
     }
     
-    const net = parseFloat((gross - empty).toFixed(2));
-    
-    // updateStock(id, field, delta) is designed to add 1 unit by default.
-    // We want to add exactly `net` units.
-    // However, updateProduct logic does `p.stock += delta`. We can just call it `net` times?
-    // No, wait, delta is the amount added! Oh, `updateProduct` directly adds `delta` to stock.
-    // Let's call updateProduct with the exact `net` value as delta!
+    let net = parseFloat((gross - empty).toFixed(2));
     
     let prods = JSON.parse(localStorage.getItem('products') || '[]');
     let p = prods.find(x => String(x.id) === String(prodId));
     if (!p) return;
     
+    if (p.unit.toLowerCase() === 'kg') {
+        net = parseFloat((net / 1000).toFixed(3));
+    }
+    
     // update stock directly to bypass maxStock limits in updateProduct
-    p.stock += net;
+    p.stock = parseFloat((p.stock + net).toFixed(3));
     
     const today = new Date().toISOString().split('T')[0];
     if (!p.history) p.history = {};
