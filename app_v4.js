@@ -1763,6 +1763,13 @@ window.renderProducts = () => {
                                     <div class="w-px h-6 bg-stone-300 mx-0.5"></div>
                                     <button onclick="openTareModalForProduct(${p.id})" class="w-7 h-7 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold flex items-center justify-center transition" title="Daralı/Tepsili Stok Ekle"><i data-lucide="scale" class="w-3.5 h-3.5"></i></button>
                                 </div>
+                                <div class="mt-1 flex justify-between items-center px-1">
+                                    <div class="text-[9px] text-stone-400 font-bold flex gap-2" title="Stoğa Giren Toplam Miktar">
+                                        <span>Giren: <span class="text-stone-600">${parseFloat(p.totalEntered || 0).toFixed(3).replace(/\.?0+$/, '')}</span></span>
+                                        <span title="Giren - Mevcut Stok">Satılan: <span class="text-indigo-600 font-black">${parseFloat(Math.max(0, (p.totalEntered || 0) - p.stock)).toFixed(3).replace(/\.?0+$/, '')}</span></span>
+                                    </div>
+                                    <button onclick="resetConsumption(${p.id})" class="text-stone-300 hover:text-rose-500 transition" title="Hesaplamayı Sıfırla (Gün Sonu)"><i data-lucide="rotate-ccw" class="w-3 h-3"></i></button>
+                                </div>
                             </div>
                             <div class="w-10 h-10 rounded-full border-4 ${circleColor} flex items-center justify-center font-black text-[10px]">
                                 %${pct}
@@ -4958,5 +4965,17 @@ window.setExactProductValue = (id, field, valStr) => {
     
     if (delta !== 0) {
         window.updateProduct(id, field, delta);
+    }
+};
+
+window.resetConsumption = (id) => {
+    if(confirm("Bu ürünün 'Giren' ve 'Satılan' hesaplamasını sıfırlamak istiyor musunuz? (Mevcut stok miktarınız değişmeyecektir)")) {
+        let prods = JSON.parse(localStorage.getItem('products') || '[]');
+        let p = prods.find(x => String(x.id) === String(id));
+        if(p) {
+            p.totalEntered = p.stock || 0;
+            localStorage.setItem('products', JSON.stringify(prods));
+            renderProducts();
+        }
     }
 };
