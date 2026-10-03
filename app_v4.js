@@ -4751,25 +4751,42 @@ const _renderCustOrderCalendar = (container, list) => {
             const imgHtml = o.image ? `<img src="${o.image}" class="w-12 h-12 rounded-xl object-cover border border-stone-200" onclick="window.open('${o.image}','_blank')">` : '';
             
             blockHtml += `
-            <div class="flex items-stretch gap-4 bg-white p-4 rounded-2xl border-l-4 ${borderCol} shadow-sm hover:shadow-md transition cursor-pointer group" onclick="openCustomerOrderModal(${o.id})">
-                <div class="${timeCol} px-4 rounded-xl flex items-center justify-center font-black text-xl min-w-[5rem]">
-                    ${timeDisplay}
-                </div>
-                
-                <div class="flex-1 flex items-center gap-4">
-                    ${imgHtml}
-                    <div>
-                        <div class="text-lg font-black text-stone-800 group-hover:text-amber-600 transition">${o.productName} ${o.cakeContent ? `<span class="text-stone-400 font-bold text-sm">(${o.cakeContent})</span>` : ''}</div>
-                        <div class="text-sm font-bold text-stone-500 flex items-center gap-3 mt-1">
-                            <span class="flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5"></i> ${o.customerName}</span>
-                            ${o.notes ? `<span class="flex items-center gap-1 text-rose-500"><i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> ${o.notes}</span>` : ''}
+            <div class="flex flex-col sm:flex-row items-stretch bg-white p-2 sm:p-4 rounded-2xl border-l-4 ${borderCol} shadow-sm hover:shadow-md transition group">
+                <div class="flex flex-1 items-stretch gap-4 cursor-pointer" onclick="openCustomerOrderModal(${o.id})">
+                    <div class="${timeCol} px-4 rounded-xl flex items-center justify-center font-black text-xl min-w-[5rem]">
+                        ${timeDisplay}
+                    </div>
+                    
+                    <div class="flex-1 flex items-center gap-4 py-2 sm:py-0">
+                        ${imgHtml}
+                        <div>
+                            <div class="text-lg font-black text-stone-800 group-hover:text-amber-600 transition">${o.productName} ${o.cakeContent ? `<span class="text-stone-400 font-bold text-sm">(${o.cakeContent})</span>` : ''}</div>
+                            <div class="text-sm font-bold text-stone-500 flex items-center gap-3 mt-1">
+                                <span class="flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5"></i> ${o.customerName}</span>
+                                ${o.notes ? `<span class="flex items-center gap-1 text-rose-500"><i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> ${o.notes}</span>` : ''}
+                            </div>
                         </div>
                     </div>
+                    
+                    <div class="hidden sm:flex flex-col items-end justify-center px-4 border-l border-stone-100 mr-2">
+                        <div class="text-xl font-black text-stone-800">${o.price ? o.price + ' ₺' : '-'}</div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-stone-400">Tutar</div>
+                    </div>
                 </div>
-                
-                <div class="hidden sm:flex flex-col items-end justify-center px-4 border-l border-stone-100">
-                    <div class="text-xl font-black text-stone-800">${o.price ? o.price + ' ₺' : '-'}</div>
-                    <div class="text-[10px] font-black uppercase tracking-widest text-stone-400">Tutar</div>
+
+                <div class="flex items-stretch justify-end gap-2 sm:border-l sm:border-stone-100 sm:pl-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-stone-100 mt-2 sm:mt-0">
+                    ${isActive ? `
+                    <button onclick="completeCustomerOrder(${o.id})" class="flex-1 sm:flex-none px-6 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-black rounded-xl transition active:scale-95 flex items-center justify-center gap-2 text-sm border border-emerald-100" title="Teslim Edildi">
+                        <i data-lucide="check" class="w-5 h-5"></i> <span class="sm:hidden">Teslim Edildi</span>
+                    </button>
+                    ` : `
+                    <button onclick="revertCustomerOrder(${o.id})" class="flex-1 sm:flex-none px-6 bg-stone-50 hover:bg-stone-100 text-stone-600 font-black rounded-xl transition active:scale-95 flex items-center justify-center gap-2 text-sm border border-stone-200" title="Geri Al">
+                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i> <span class="sm:hidden">Geri Al</span>
+                    </button>
+                    `}
+                    <button onclick="deleteCustomerOrder(${o.id})" class="px-5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-black rounded-xl transition active:scale-95 border border-rose-100 flex items-center justify-center" title="Sil">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
                 </div>
             </div>
             `;
