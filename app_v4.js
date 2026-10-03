@@ -4803,3 +4803,95 @@ const _renderCustOrderCalendar = (container, list) => {
     
     container.innerHTML = html;
 };
+
+
+// --- TARE (DARALI GİRİŞ) MODAL LOGIC ---
+window.openTareModal = () => {
+    // Populate product dropdown
+    const select = document.getElementById('tare-product-select');
+    select.innerHTML = '<option value="">-- Ürün Seçiniz --</option>';
+    
+    let prods = JSON.parse(localStorage.getItem('products') || '[]');
+    // Only sort and filter for easier finding
+    prods.sort((a,b) => a.name.localeCompare(b.name)).forEach(p => {
+        select.innerHTML += `<option value="${p.id}">${p.name} (${p.unit}) - Kategori: ${p.category}</option>`;
+    });
+    
+    document.getElementById('tare-empty-weight').value = '';
+    document.getElementById('tare-gross-weight').value = '';
+    document.getElementById('tare-net-result').textContent = '0';
+    document.getElementById('tare-submit-btn').disabled = true;
+    
+    window.openModal('tare-modal');
+};
+
+window.calcTareNet = () => {
+    const emptyStr = document.getElementById('tare-empty-weight').value;
+    const grossStr = document.getElementById('tare-gross-weight').value;
+    
+    const empty = parseFloat(emptyStr) || 0;
+    const gross = parseFloat(grossStr) || 0;
+    
+    const btn = document.getElementById('tare-submit-btn');
+    const netEl = document.getElementById('tare-net-result');
+    
+    if (emptyStr === '' || grossStr === '' || gross <= empty) {
+        netEl.textContent = 'HATA';
+        netEl.classList.add('text-rose-600');
+        btn.disabled = true;
+    } else {
+        const net = parseFloat((gross - empty).toFixed(2));
+        netEl.textContent = net;
+        netEl.classList.remove('text-rose-600');
+        btn.disabled = false;
+    }
+};
+
+window.submitTareForm = (e) => {
+    e.preventDefault();
+    const prodId = document.getElementById('tare-product-select').value;
+    const empty = parseFloat(document.getElementById('tare-empty-weight').value);
+    const gross = parseFloat(document.getElementById('tare-gross-weight').value);
+    
+    if(!prodId) {
+        showToast('Lütfen bir ürün seçin!', 'error');
+        return;
+    }
+    if (gross <= empty) {
+        showToast('Brüt ağırlık, boş tepsi ağırlığından büyük olmalıdır!', 'error');
+        return;
+    }
+    
+    const net = parseFloat((gross - empty).toFixed(2));
+    
+    // updateStock(id, field, delta) is designed to add 1 unit by default.
+    // We want to add exactly `net` units.
+    // However, updateProduct logic does `p.stock += delta`. We can just call it `net` times?
+    // No, wait, delta is the amount added! Oh, `updateProduct` directly adds `delta` to stock.
+    // Let's call updateProduct with the exact `net` value as delta!
+    
+    let prods = JSON.parse(localStorage.getItem('products') || '[]');
+    let p = prods.find(x => String(x.id) === String(prodId));
+    if (!p) return;
+    
+    // update stock directly to bypass maxStock limits in updateProduct
+    p.stock += net;
+    
+    const today = new Date().toISOString().split('T')[0];
+    if (!p.history) p.history = {};
+    if (!p.history[today]) p.history[today] = { sales: 0, waste: 0, criticalDrops: 0, restocks: 0, entered: 0 };
+    if (typeof p.totalEntered === 'undefined') p.totalEntered = (p.stock || 0) + (p.sales || 0) + (p.waste || 0);
+    
+    p.totalEntered += net;
+    p.history[today].entered = (p.history[today].entered || 0) + net;
+    
+    localStorage.setItem('products', JSON.stringify(prods));
+    
+    // Render changes
+    if(document.getElementById('view-inventory').style.display !== 'none') window.renderInventory();
+    if(document.getElementById('view-upper').style.display !== 'none') window.renderProducts();
+    
+    showToast(`${p.name} stoklarına NET ${net} ${p.unit} eklendi! (Brüt: ${gross} - Dara: ${empty})`, 'success');
+    
+    window.closeModal('tare-modal');
+};

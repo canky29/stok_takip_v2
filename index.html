@@ -499,6 +499,9 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-2 flex-wrap w-full md:w-auto justify-end">
+                        <button onclick="openTareModal()" class="px-4 py-2.5 bg-indigo-600 text-white text-xs font-black rounded-xl hover:bg-indigo-700 flex items-center gap-2 shadow-md transition whitespace-nowrap">
+                            <i data-lucide="scale" class="w-4 h-4"></i> Tepsili (Daralı) Giriş
+                        </button>
                         <button onclick="openAddProductModal()" class="px-4 py-2.5 bg-stone-900 text-white text-xs font-black rounded-xl hover:bg-stone-800 flex items-center gap-2 shadow-md transition whitespace-nowrap">
                             <i data-lucide="plus" class="w-4 h-4"></i> Yeni Ürün
                         </button>
@@ -859,6 +862,9 @@
                     <input type="text" id="inventory-search" oninput="renderInventory()" placeholder="Envanterde ürün ara..." class="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
                 <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                    <button onclick="openTareModal()" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-6 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i data-lucide="scale" class="w-5 h-5"></i> Tepsili (Daralı) Giriş
+                    </button>
                     <button onclick="addNewInvCategory()" class="w-full md:w-auto bg-stone-100 hover:bg-stone-200 text-stone-700 font-black py-3 px-6 rounded-xl border border-stone-200 transition active:scale-95 flex items-center justify-center gap-2">
                         <i data-lucide="folder-plus" class="w-5 h-5"></i> Yeni Kategori
                     </button>
@@ -2246,7 +2252,7 @@
         </div>
     </div>
 
-    <script src="app_v4.js?v=1791018064"></script>
+    <script src="app_v4.js?v=1791032777"></script>
     <script type="module" src="firebase_sync.js"></script>
 
     <!-- Unified Confirm Modal -->
@@ -2455,6 +2461,61 @@
                 <button onclick="saveInventoryRequest()" class="flex-1 py-3.5 rounded-xl font-black text-white bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-2">
                     <i data-lucide="check" class="w-4 h-4"></i> Talebi İlet
                 </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TARE (DARALI GİRİŞ) MODAL -->
+    <div id="tare-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-slide-up relative">
+            <button type="button" onclick="closeModal('tare-modal')" class="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-stone-100 text-stone-500 hover:bg-stone-200 transition">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <div class="p-8">
+                <div class="flex flex-col items-center text-center mb-8">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4">
+                        <i data-lucide="scale" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-stone-900">Daralı (Tepsili) Stok Girişi</h2>
+                    <p class="text-sm font-bold text-stone-400 mt-1">Brüt ağırlıktan tepsi darasını düşerek net stoku ekleyin.</p>
+                </div>
+                
+                <form onsubmit="window.submitTareForm(event)">
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-2">Hangi Ürüne Eklenecek?</label>
+                            <select id="tare-product-select" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                <option value="">-- Ürün Seçiniz --</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-2">Boş Tepsi Ağırlığı (Dara) - Gram</label>
+                            <div class="relative">
+                                <input type="number" id="tare-empty-weight" required min="1" step="0.01" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-lg font-black text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder="Örn: 450" oninput="window.calcTareNet()">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 font-black">Gr</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-2">Brüt Ağırlık (Tepsi + Ürün) - Gram</label>
+                            <div class="relative">
+                                <input type="number" id="tare-gross-weight" required min="1" step="0.01" class="w-full bg-rose-50 border border-rose-200 rounded-xl py-3 px-4 text-xl font-black text-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 transition" placeholder="Örn: 1500" oninput="window.calcTareNet()">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-rose-400 font-black">Gr</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-indigo-50 border-2 border-indigo-100 rounded-2xl p-5 flex flex-col items-center justify-center">
+                            <span class="text-xs font-black text-indigo-400 uppercase tracking-widest mb-1">Eklenecek Net Ağırlık</span>
+                            <div class="text-4xl font-black text-indigo-700"><span id="tare-net-result">0</span> <span class="text-xl">Gr</span></div>
+                        </div>
+
+                        <button type="submit" id="tare-submit-btn" disabled class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl shadow-lg shadow-indigo-600/30 transition active:scale-95 flex items-center justify-center gap-2">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i> Net Stoku Ekle
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
