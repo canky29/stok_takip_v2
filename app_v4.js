@@ -1173,7 +1173,7 @@ window.updateProduct = (id, field, delta) => {
                     p.history[today].entered = parseFloat(((p.history[today].entered || 0) + delta).toFixed(3));
                 }
             } else {
-                if (window.showToast) window.showToast('Stok 0\\'ın altına düşemez!', 'error');
+                if (window.showToast) window.showToast("Stok 0'ın altına düşemez!", 'error');
                 return;
             }
         } else if(field === 'sales') {
@@ -1191,7 +1191,7 @@ window.updateProduct = (id, field, delta) => {
                 p.stock = parseFloat((p.stock - delta).toFixed(3)); 
                 p.history[today].sales = Math.max(0, parseFloat(((p.history[today].sales || 0) + delta).toFixed(3))); 
             } else if (delta < 0) {
-                if (window.showToast) window.showToast('Satış 0\\'ın altına düşemez!', 'error');
+                if (window.showToast) window.showToast("Satış 0'ın altına düşemez!", 'error');
                 return;
             }
         } else if(field === 'waste') {
@@ -1209,7 +1209,7 @@ window.updateProduct = (id, field, delta) => {
                 p.stock = parseFloat((p.stock - delta).toFixed(3)); 
                 p.history[today].waste = Math.max(0, parseFloat(((p.history[today].waste || 0) + delta).toFixed(3))); 
             } else if (delta < 0) {
-                if (window.showToast) window.showToast('Fire 0\\'ın altına düşemez!', 'error');
+                if (window.showToast) window.showToast("Fire 0'ın altına düşemez!", 'error');
                 return;
             }
         }
@@ -1782,8 +1782,8 @@ window.renderProducts = () => {
                                 </div>
                                 <div class="mt-1 flex justify-between items-center px-1">
                                     <div class="text-[9px] text-stone-400 font-bold flex gap-2" title="Stoğa Giren Toplam Miktar">
-                                        <span><button onclick="promptAdd(${p.id}, 'stock', 'Stok Girişi')" class="hover:underline hover:text-stone-700 transition" title="Hızlı Stok Ekle">Giren:</button> <span class="text-stone-600">${parseFloat(p.totalEntered || 0).toFixed(3).replace(/\\.?0+$/, '')}</span></span>
-                                        <span title="Giren - Mevcut Stok">Çıkan: <span class="text-indigo-600 font-black">${parseFloat(Math.max(0, (p.totalEntered || 0) - p.stock)).toFixed(3).replace(/\\.?0+$/, '')}</span></span>
+                                        <span><button onclick="promptAdd(${p.id}, 'stock', 'Stok Girişi')" class="hover:underline hover:text-stone-700 transition" title="Hızlı Stok Ekle">Giren:</button> <span class="text-stone-600">${parseFloat(p.totalEntered || 0).toFixed(3).replace(/\.?0+$/, '')}</span></span>
+                                        <span title="Giren - Mevcut Stok">Çıkan: <span class="text-indigo-600 font-black">${parseFloat(Math.max(0, (p.totalEntered || 0) - p.stock)).toFixed(3).replace(/\.?0+$/, '')}</span></span>
                                     </div>
                                     <div class="flex items-center gap-1">
                                         <button onclick="resetConsumption(${p.id})" class="text-stone-300 hover:text-rose-500 transition" title="Gün Sonu Sıfırla (Satış ve Fire 0'lanır)"><i data-lucide="rotate-ccw" class="w-3 h-3"></i></button>
