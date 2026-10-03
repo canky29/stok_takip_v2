@@ -1161,7 +1161,7 @@ window.updateProduct = (id, field, delta) => {
         const prevStock = p.stock;
         
         if(field === 'stock') {
-            if(p.stock + delta >= 0 && p.stock + delta <= p.maxStock) {
+            if(p.stock + delta >= 0) {
                 p.stock = parseFloat((p.stock + delta).toFixed(3));
                 if(delta > 0) {
                     p.totalEntered = parseFloat(((p.totalEntered || 0) + delta).toFixed(3));
