@@ -4989,17 +4989,24 @@ window.setExactProductValue = (id, field, valStr) => {
 };
 
 window.resetConsumption = (id) => {
-    if(confirm("Bu ürünün 'Giren' ve 'Satılan' hesaplamasını sıfırlamak istiyor musunuz? (Mevcut stok miktarınız değişmeyecektir)")) {
-        let prods = JSON.parse(localStorage.getItem('products') || '[]');
-        let p = prods.find(x => String(x.id) === String(id));
-        if(p) {
-            p.totalEntered = p.stock || 0;
-            p.sales = 0;
-            p.waste = 0;
-            localStorage.setItem('products', JSON.stringify(prods));
-            renderProducts();
+    window.openConfirmModal(
+        'Gün Sonu Sıfırlama',
+        'Bu ürünün "Giren" ve "Çıkan" hesaplamasını sıfırlamak istiyor musunuz? (Mevcut stok miktarınız sabit kalacaktır)',
+        'Evet, Sıfırla',
+        () => {
+            let prods = JSON.parse(localStorage.getItem('products') || '[]');
+            let p = prods.find(x => String(x.id) === String(id));
+            if(p) {
+                p.totalEntered = p.stock || 0;
+                p.sales = 0;
+                p.waste = 0;
+                localStorage.setItem('products', JSON.stringify(prods));
+                renderProducts();
+                window.closeConfirmModal();
+                if (window.showToast) window.showToast('Gün sonu sıfırlaması yapıldı.', 'success');
+            }
         }
-    }
+    );
 };
 
 window.promptAdd = (id, field, label) => {
@@ -5015,25 +5022,31 @@ window.promptAdd = (id, field, label) => {
 };
 
 window.hardResetProduct = (id) => {
-    if(confirm("DİKKAT: Bu ürünün Mevcut Stok, Toplam Giren, Çıkan, Satış ve Fire verilerini TAMAMEN SIFIRLAMAK istediğinize emin misiniz? (Tüm rakamlar 0 olacak)")) {
-        let prods = JSON.parse(localStorage.getItem('products') || '[]');
-        let p = prods.find(x => String(x.id) === String(id));
-        if(p) {
-            p.stock = 0;
-            p.sales = 0;
-            p.waste = 0;
-            p.totalEntered = 0;
-            
-            const today = new Date().toISOString().split('T')[0];
-            if(p.history && p.history[today]) {
-                p.history[today].entered = 0;
-                p.history[today].sales = 0;
-                p.history[today].waste = 0;
+    window.openConfirmModal(
+        'Tüm Verileri Sıfırla',
+        'DİKKAT: Bu ürünün Mevcut Stok, Toplam Giren, Çıkan, Satış ve Fire verilerini TAMAMEN SIFIRLAMAK istediğinize emin misiniz? (Tüm rakamlar 0 olacak)',
+        'Evet, Tamamen Sıfırla',
+        () => {
+            let prods = JSON.parse(localStorage.getItem('products') || '[]');
+            let p = prods.find(x => String(x.id) === String(id));
+            if(p) {
+                p.stock = 0;
+                p.sales = 0;
+                p.waste = 0;
+                p.totalEntered = 0;
+                
+                const today = new Date().toISOString().split('T')[0];
+                if(p.history && p.history[today]) {
+                    p.history[today].entered = 0;
+                    p.history[today].sales = 0;
+                    p.history[today].waste = 0;
+                }
+                
+                localStorage.setItem('products', JSON.stringify(prods));
+                renderProducts();
+                window.closeConfirmModal();
+                if (window.showToast) window.showToast('Ürün verileri tamamen sıfırlandı.', 'success');
             }
-            
-            localStorage.setItem('products', JSON.stringify(prods));
-            renderProducts();
-            if (window.showToast) window.showToast('Ürün verileri tamamen sıfırlandı.', 'success');
         }
-    }
+    );
 };
