@@ -2150,6 +2150,26 @@ window.renderAnalyticsFloor = () => {
 // --- CUSTOMER ORDERS LOGIC ---
 
 let customerOrdersTab = 'ACTIVE';
+window.customerOrderViewMode = 'list';
+
+window.setCustomerOrderViewMode = (mode) => {
+    window.customerOrderViewMode = mode;
+    
+    // Update button styles
+    const btnList = document.getElementById('cust-view-btn-list');
+    const btnCal = document.getElementById('cust-view-btn-calendar');
+    
+    if(mode === 'list') {
+        btnList.className = 'px-4 py-1.5 text-xs font-black rounded-lg transition bg-white text-stone-800 shadow-sm flex items-center gap-1.5';
+        btnCal.className = 'px-4 py-1.5 text-xs font-black rounded-lg transition text-stone-500 hover:text-stone-800 flex items-center gap-1.5';
+    } else {
+        btnCal.className = 'px-4 py-1.5 text-xs font-black rounded-lg transition bg-white text-stone-800 shadow-sm flex items-center gap-1.5';
+        btnList.className = 'px-4 py-1.5 text-xs font-black rounded-lg transition text-stone-500 hover:text-stone-800 flex items-center gap-1.5';
+    }
+    
+    // Change container grid style if needed, but we do it inside render
+    renderCustomerOrders();
+};
 
 window.openCustomerOrderModal = (id = null) => {
     document.getElementById('customer-order-form').reset();
@@ -2451,11 +2471,23 @@ window.renderCustomerOrders = () => {
     if(customerOrdersTab === 'ACTIVE') {
         actContainer.classList.remove('hidden');
         delContainer.classList.add('hidden');
-        _renderCustOrderGrid(actContainer, activeOrders, true);
+        if (window.customerOrderViewMode === 'calendar') {
+            actContainer.className = 'flex flex-col gap-8';
+            _renderCustOrderCalendar(actContainer, activeOrders);
+        } else {
+            actContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+            _renderCustOrderGrid(actContainer, activeOrders, true);
+        }
     } else {
         actContainer.classList.add('hidden');
         delContainer.classList.remove('hidden');
-        _renderCustOrderGrid(delContainer, delivOrders, false);
+        if (window.customerOrderViewMode === 'calendar') {
+            delContainer.className = 'flex flex-col gap-8';
+            _renderCustOrderCalendar(delContainer, delivOrders);
+        } else {
+            delContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+            _renderCustOrderGrid(delContainer, delivOrders, false);
+        }
     }
     if(typeof lucide !== 'undefined') lucide.createIcons();
 };
@@ -4648,4 +4680,102 @@ window.renderCriticalStockPanel = () => {
     html += `</div></div>`;
     panel.innerHTML = html;
     if(typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+
+const _renderCustOrderCalendar = (container, list) => {
+    if(list.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-12 text-stone-500 font-bold bg-white rounded-3xl border border-stone-200 shadow-sm flex flex-col items-center justify-center gap-2"><i data-lucide="inbox" class="w-10 h-10 text-stone-300"></i>Bu görünüme ait sipariş bulunamadı.</div>`;
+        return;
+    }
+    
+    // Group by Date
+    const grouped = {};
+    const noDate = [];
+    
+    list.forEach(o => {
+        if (!o.date) {
+            noDate.push(o);
+        } else {
+            if(!grouped[o.date]) grouped[o.date] = [];
+            grouped[o.date].push(o);
+        }
+    });
+    
+    // Sort dates
+    const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
+    
+    let html = '';
+    
+    const renderDayBlock = (dateStr, items) => {
+        let blockHtml = `<div class="bg-stone-50/50 p-6 rounded-[2rem] border border-stone-200/60 shadow-sm">`;
+        
+        let displayDate = dateStr;
+        if(dateStr !== 'Tarihsiz') {
+            const d = new Date(dateStr);
+            const today = new Date();
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const isToday = d.toDateString() === today.toDateString();
+            const isTomorrow = d.toDateString() === tomorrow.toDateString();
+            
+            let dateLabel = d.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
+            if (isToday) dateLabel = `<span class="bg-rose-500 text-white px-2 py-0.5 rounded-md text-xs uppercase tracking-wider ml-2 shadow-sm animate-pulse">Bugün</span> ` + dateLabel;
+            if (isTomorrow) dateLabel = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded-md text-xs uppercase tracking-wider ml-2 shadow-sm">Yarın</span> ` + dateLabel;
+            
+            blockHtml += `<h3 class="text-2xl font-black text-stone-800 mb-6 flex items-center gap-2 border-b border-stone-200 pb-3"><i data-lucide="calendar-days" class="w-6 h-6 text-stone-400"></i> ${dateLabel}</h3>`;
+        } else {
+            blockHtml += `<h3 class="text-xl font-black text-stone-500 mb-6 flex items-center gap-2 border-b border-stone-200 pb-3"><i data-lucide="calendar-off" class="w-5 h-5 text-stone-400"></i> Tarihi Belirtilmeyenler</h3>`;
+        }
+        
+        blockHtml += `<div class="space-y-4">`;
+        
+        // Sort items by time
+        items.sort((a,b) => (a.time || '23:59').localeCompare(b.time || '23:59')).forEach(o => {
+            const timeDisplay = o.time || '--:--';
+            const isActive = o.status === 'ACTIVE';
+            
+            const borderCol = isActive ? 'border-amber-500' : 'border-emerald-500';
+            const timeCol = isActive ? 'text-amber-600 bg-amber-50' : 'text-emerald-600 bg-emerald-50';
+            const imgHtml = o.image ? `<img src="${o.image}" class="w-12 h-12 rounded-xl object-cover border border-stone-200" onclick="window.open('${o.image}','_blank')">` : '';
+            
+            blockHtml += `
+            <div class="flex items-stretch gap-4 bg-white p-4 rounded-2xl border-l-4 ${borderCol} shadow-sm hover:shadow-md transition cursor-pointer group" onclick="openCustomerOrderModal(${o.id})">
+                <div class="${timeCol} px-4 rounded-xl flex items-center justify-center font-black text-xl min-w-[5rem]">
+                    ${timeDisplay}
+                </div>
+                
+                <div class="flex-1 flex items-center gap-4">
+                    ${imgHtml}
+                    <div>
+                        <div class="text-lg font-black text-stone-800 group-hover:text-amber-600 transition">${o.productName} ${o.cakeContent ? `<span class="text-stone-400 font-bold text-sm">(${o.cakeContent})</span>` : ''}</div>
+                        <div class="text-sm font-bold text-stone-500 flex items-center gap-3 mt-1">
+                            <span class="flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5"></i> ${o.customerName}</span>
+                            ${o.notes ? `<span class="flex items-center gap-1 text-rose-500"><i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> ${o.notes}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hidden sm:flex flex-col items-end justify-center px-4 border-l border-stone-100">
+                    <div class="text-xl font-black text-stone-800">${o.price ? o.price + ' ₺' : '-'}</div>
+                    <div class="text-[10px] font-black uppercase tracking-widest text-stone-400">Tutar</div>
+                </div>
+            </div>
+            `;
+        });
+        
+        blockHtml += `</div></div>`;
+        return blockHtml;
+    };
+    
+    sortedDates.forEach(d => {
+        html += renderDayBlock(d, grouped[d]);
+    });
+    
+    if(noDate.length > 0) {
+        html += renderDayBlock('Tarihsiz', noDate);
+    }
+    
+    container.innerHTML = html;
 };

@@ -621,14 +621,25 @@
 
                 <div class="border-t border-stone-100"></div>
 
-                <!-- Tabs (Aktif Siparişler / Teslim Edilenler) -->
-                <div class="flex items-center gap-2">
-                    <button onclick="setCustomerOrderTab('ACTIVE')" id="cust-tab-ACTIVE" class="px-4 py-2 text-xs font-black rounded-xl transition bg-amber-600 text-white shadow-sm flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> Aktif Siparişler
-                    </button>
-                    <button onclick="setCustomerOrderTab('DELIVERED')" id="cust-tab-DELIVERED" class="px-4 py-2 text-xs font-black rounded-xl transition bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2">
-                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i> Teslim Edilen Siparişler
-                    </button>
+                <!-- View Mode & Tabs -->
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <button onclick="setCustomerOrderTab('ACTIVE')" id="cust-tab-ACTIVE" class="px-4 py-2 text-xs font-black rounded-xl transition bg-amber-600 text-white shadow-sm flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> Aktif Siparişler
+                        </button>
+                        <button onclick="setCustomerOrderTab('DELIVERED')" id="cust-tab-DELIVERED" class="px-4 py-2 text-xs font-black rounded-xl transition bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2">
+                            <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i> Teslim Edilen Siparişler
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 bg-stone-100 p-1 rounded-xl" id="cust-view-mode-container">
+                        <button onclick="setCustomerOrderViewMode('list')" id="cust-view-btn-list" class="px-4 py-1.5 text-xs font-black rounded-lg transition bg-white text-stone-800 shadow-sm flex items-center gap-1.5">
+                            <i data-lucide="layout-grid" class="w-4 h-4"></i> Izgara / Liste
+                        </button>
+                        <button onclick="setCustomerOrderViewMode('calendar')" id="cust-view-btn-calendar" class="px-4 py-1.5 text-xs font-black rounded-lg transition text-stone-500 hover:text-stone-800 flex items-center gap-1.5">
+                            <i data-lucide="calendar-clock" class="w-4 h-4"></i> Ajanda (Takvim)
+                        </button>
+                    </div>
                 </div>
             </div>
 
