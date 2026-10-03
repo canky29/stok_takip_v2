@@ -1172,8 +1172,15 @@ window.updateProduct = (id, field, delta) => {
                     p.totalEntered = parseFloat(((p.totalEntered || 0) + delta).toFixed(3));
                     p.history[today].entered = parseFloat(((p.history[today].entered || 0) + delta).toFixed(3));
                 }
+            } else {
+                if (window.showToast) window.showToast('Stok 0\\'ın altına düşemez!', 'error');
+                return;
             }
         } else if(field === 'sales') {
+            if(delta > 0 && p.stock < delta) {
+                if (window.showToast) window.showToast('Yetersiz stok!', 'error');
+                return;
+            }
             if(delta > 0 && p.stock >= delta) { 
                 p.sales = parseFloat(((p.sales || 0) + delta).toFixed(3)); 
                 p.stock = parseFloat((p.stock - delta).toFixed(3)); 
@@ -1183,8 +1190,15 @@ window.updateProduct = (id, field, delta) => {
                 p.sales = parseFloat(((p.sales || 0) + delta).toFixed(3)); 
                 p.stock = parseFloat((p.stock - delta).toFixed(3)); 
                 p.history[today].sales = Math.max(0, parseFloat(((p.history[today].sales || 0) + delta).toFixed(3))); 
+            } else if (delta < 0) {
+                if (window.showToast) window.showToast('Satış 0\\'ın altına düşemez!', 'error');
+                return;
             }
         } else if(field === 'waste') {
+            if(delta > 0 && p.stock < delta) {
+                if (window.showToast) window.showToast('Yetersiz stok!', 'error');
+                return;
+            }
             if(delta > 0 && p.stock >= delta) { 
                 p.waste = parseFloat(((p.waste || 0) + delta).toFixed(3)); 
                 p.stock = parseFloat((p.stock - delta).toFixed(3)); 
@@ -1194,6 +1208,9 @@ window.updateProduct = (id, field, delta) => {
                 p.waste = parseFloat(((p.waste || 0) + delta).toFixed(3)); 
                 p.stock = parseFloat((p.stock - delta).toFixed(3)); 
                 p.history[today].waste = Math.max(0, parseFloat(((p.history[today].waste || 0) + delta).toFixed(3))); 
+            } else if (delta < 0) {
+                if (window.showToast) window.showToast('Fire 0\\'ın altına düşemez!', 'error');
+                return;
             }
         }
         
@@ -1765,10 +1782,13 @@ window.renderProducts = () => {
                                 </div>
                                 <div class="mt-1 flex justify-between items-center px-1">
                                     <div class="text-[9px] text-stone-400 font-bold flex gap-2" title="Stoğa Giren Toplam Miktar">
-                                        <span>Giren: <span class="text-stone-600">${parseFloat(p.totalEntered || 0).toFixed(3).replace(/\.?0+$/, '')}</span></span>
-                                        <span title="Giren - Mevcut Stok">Satılan: <span class="text-indigo-600 font-black">${parseFloat(Math.max(0, (p.totalEntered || 0) - p.stock)).toFixed(3).replace(/\.?0+$/, '')}</span></span>
+                                        <span><button onclick="promptAdd(${p.id}, 'stock', 'Stok Girişi')" class="hover:underline hover:text-stone-700 transition" title="Hızlı Stok Ekle">Giren:</button> <span class="text-stone-600">${parseFloat(p.totalEntered || 0).toFixed(3).replace(/\\.?0+$/, '')}</span></span>
+                                        <span title="Giren - Mevcut Stok">Çıkan: <span class="text-indigo-600 font-black">${parseFloat(Math.max(0, (p.totalEntered || 0) - p.stock)).toFixed(3).replace(/\\.?0+$/, '')}</span></span>
                                     </div>
-                                    <button onclick="resetConsumption(${p.id})" class="text-stone-300 hover:text-rose-500 transition" title="Hesaplamayı Sıfırla (Gün Sonu)"><i data-lucide="rotate-ccw" class="w-3 h-3"></i></button>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="resetConsumption(${p.id})" class="text-stone-300 hover:text-rose-500 transition" title="Gün Sonu Sıfırla (Satış ve Fire 0'lanır)"><i data-lucide="rotate-ccw" class="w-3 h-3"></i></button>
+                                        <button onclick="hardResetProduct(${p.id})" class="text-stone-200 hover:text-red-600 transition" title="Testleri Tamamen Sıfırla (Her Şeyi 0'la)"><i data-lucide="eraser" class="w-3 h-3"></i></button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="w-10 h-10 rounded-full border-4 ${circleColor} flex items-center justify-center font-black text-[10px]">
@@ -1777,7 +1797,7 @@ window.renderProducts = () => {
                         </div>
                         <div class="flex gap-2">
                             <div class="flex-1 border border-stone-200 rounded-xl p-1.5 flex justify-between items-center bg-stone-50">
-                                <span class="text-[10px] font-bold text-stone-500">Satış:</span>
+                                <button onclick="promptAdd(${p.id}, 'sales', 'Satış')" class="text-[10px] font-bold text-stone-500 hover:underline hover:text-stone-700 transition" title="Hızlı Satış Ekle">Satış:</button>
                                 <div class="flex items-center gap-1">
                                     <button onclick="updateProduct(${p.id}, 'sales', -1)" class="w-5 h-5 bg-stone-200 rounded text-[10px] font-bold hover:bg-stone-300">-</button>
                                     <input type="number" step="0.001" value="${p.sales || 0}" onchange="setExactProductValue(${p.id}, 'sales', this.value)" class="text-xs font-black w-12 text-center text-emerald-700 bg-transparent border-b border-dashed border-emerald-300 focus:outline-none focus:border-emerald-500 p-0 m-0" title="Satış miktarını elinizle yazabilirsiniz">
@@ -1785,7 +1805,7 @@ window.renderProducts = () => {
                                 </div>
                             </div>
                             <div class="flex-1 border border-stone-200 rounded-xl p-1.5 flex justify-between items-center bg-stone-50">
-                                <span class="text-[10px] font-bold text-stone-500">Fire:</span>
+                                <button onclick="promptAdd(${p.id}, 'waste', 'Fire')" class="text-[10px] font-bold text-stone-500 hover:underline hover:text-stone-700 transition" title="Hızlı Fire Ekle">Fire:</button>
                                 <div class="flex items-center gap-1">
                                     <button onclick="updateProduct(${p.id}, 'waste', -1)" class="w-5 h-5 bg-stone-200 rounded text-[10px] font-bold hover:bg-stone-300">-</button>
                                     <input type="number" step="0.001" value="${p.waste || 0}" onchange="setExactProductValue(${p.id}, 'waste', this.value)" class="text-xs font-black w-12 text-center text-rose-700 bg-transparent border-b border-dashed border-rose-300 focus:outline-none focus:border-rose-500 p-0 m-0" title="Fire miktarını elinizle yazabilirsiniz">
@@ -4974,8 +4994,46 @@ window.resetConsumption = (id) => {
         let p = prods.find(x => String(x.id) === String(id));
         if(p) {
             p.totalEntered = p.stock || 0;
+            p.sales = 0;
+            p.waste = 0;
             localStorage.setItem('products', JSON.stringify(prods));
             renderProducts();
+        }
+    }
+};
+
+window.promptAdd = (id, field, label) => {
+    let val = prompt(`${label} için eklenecek miktarı giriniz:`);
+    if(val !== null && val.trim() !== '') {
+        let num = parseFloat(val);
+        if(!isNaN(num) && num > 0) {
+            window.updateProduct(id, field, num);
+        } else {
+            if (window.showToast) window.showToast('Geçerli bir miktar giriniz.', 'error');
+        }
+    }
+};
+
+window.hardResetProduct = (id) => {
+    if(confirm("DİKKAT: Bu ürünün Mevcut Stok, Toplam Giren, Çıkan, Satış ve Fire verilerini TAMAMEN SIFIRLAMAK istediğinize emin misiniz? (Tüm rakamlar 0 olacak)")) {
+        let prods = JSON.parse(localStorage.getItem('products') || '[]');
+        let p = prods.find(x => String(x.id) === String(id));
+        if(p) {
+            p.stock = 0;
+            p.sales = 0;
+            p.waste = 0;
+            p.totalEntered = 0;
+            
+            const today = new Date().toISOString().split('T')[0];
+            if(p.history && p.history[today]) {
+                p.history[today].entered = 0;
+                p.history[today].sales = 0;
+                p.history[today].waste = 0;
+            }
+            
+            localStorage.setItem('products', JSON.stringify(prods));
+            renderProducts();
+            if (window.showToast) window.showToast('Ürün verileri tamamen sıfırlandı.', 'success');
         }
     }
 };
