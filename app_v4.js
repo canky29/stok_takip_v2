@@ -387,7 +387,7 @@ window.renderPersonnelRecords = () => {
         homeStat.innerText = `${allRecords.length} Avans / Gider`;
     }
     
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 
@@ -875,7 +875,7 @@ window.showToast = (message, type = 'success') => {
     
     container.appendChild(toast);
     
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
     
     // Ekrana giriş animasyonunu başlat
     requestAnimationFrame(() => {
@@ -904,7 +904,7 @@ window.openConfirmModal = (title, desc, confirmText, callback) => {
     const content = document.getElementById('confirm-modal-content');
     modal.classList.remove('hidden');
     setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 window.closeConfirmModal = () => {
@@ -1053,7 +1053,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.classList.add('hidden', 'opacity-0', 'pointer-events-none');
     }
 
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
     initData();
     renderCategoriesSelect();
     renderProducts();
@@ -1340,7 +1340,7 @@ window.renderOrders = () => {
     let orders = JSON.parse(localStorage.getItem('orders') || '[]');
     if(orders.length === 0) {
         container.innerHTML = `<div class="col-span-full text-center py-10 text-stone-500 font-bold"><i data-lucide="coffee" class="w-10 h-10 mx-auto mb-3 opacity-50"></i>Şu an bekleyen imalat siparişi yok.</div>`;
-        if(typeof lucide !== 'undefined') lucide.createIcons();
+        if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
         return;
     }
     
@@ -1367,7 +1367,7 @@ window.renderOrders = () => {
         `;
     });
     container.innerHTML = html;
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 
@@ -1730,7 +1730,7 @@ window.renderProducts = () => {
                 catHtml += `
                 <div class="bg-white rounded-3xl overflow-hidden shadow-lg border border-stone-200/60 hover:shadow-xl transition flex flex-col relative group/card">
                     <div class="relative h-48 w-full group">
-                        <img src="${p.image}" class="w-full h-full object-cover" />
+                        <img src="${p.image}" class="w-full h-full object-cover" loading="lazy" decoding="async" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         
                         <!-- Badges -->
@@ -1804,7 +1804,7 @@ window.renderProducts = () => {
         catHtml += `</div></div>`;
         container.innerHTML += catHtml;
     }
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 window.setRole = (role, bypassAuth = false) => {
@@ -1909,7 +1909,7 @@ if(role === 'RECIPE') {
         window.renderRecipeView();
     }
     
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 let currentSlide = 0;
@@ -2166,7 +2166,7 @@ window.renderAnalyticsFloor = () => {
         html = `<div class="text-center py-10 text-stone-500 font-bold bg-stone-50 rounded-xl border border-stone-200">Hiç kayıt bulunamadı.</div>`;
     }
     container.innerHTML = html;
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 
@@ -2235,7 +2235,7 @@ window.openCustomerOrderModal = (id = null) => {
     }
     
     window.openModal('customer-order-modal');
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 window.closeCustomerOrderModal = () => {
@@ -2449,13 +2449,13 @@ window.toggleFinanceReveal = () => {
     if(window.isFinanceRevealed) {
         window.isFinanceRevealed = false;
         document.getElementById('finance-reveal-icon').setAttribute('data-lucide', 'eye');
-        if(typeof lucide !== 'undefined') lucide.createIcons();
+        if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
         window.renderCustomerOrders();
     } else {
         window.pendingActionCallback = () => {
             window.isFinanceRevealed = true;
             document.getElementById('finance-reveal-icon').setAttribute('data-lucide', 'eye-off');
-            if(typeof lucide !== 'undefined') lucide.createIcons();
+            if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
             window.renderCustomerOrders();
         };
         window.setRole('ACTION_REVEAL');
@@ -2512,7 +2512,7 @@ window.renderCustomerOrders = () => {
             _renderCustOrderGrid(delContainer, delivOrders, false);
         }
     }
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 const _renderCustOrderGrid = (container, list, isActive) => {
@@ -2734,7 +2734,7 @@ window.renderReceivables = () => {
     
     if(displayList.length === 0) {
         container.innerHTML = `<div class="col-span-full text-center py-12 text-stone-500 font-bold bg-white rounded-3xl border border-stone-200 shadow-sm flex flex-col items-center justify-center gap-2"><i data-lucide="wallet" class="w-10 h-10 text-stone-300"></i>Kayıt bulunamadı.</div>`;
-        if(typeof lucide !== 'undefined') lucide.createIcons();
+        if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
         return;
     }
     
@@ -2785,7 +2785,7 @@ window.renderReceivables = () => {
         `;
     });
     container.innerHTML = html;
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 window.openReceivableModal = () => {
@@ -3056,7 +3056,7 @@ window.renderInventory = () => {
         let imgHtml = '';
         if (r.imgUrl) {
             imgHtml = `<div class="-mx-6 -mt-6 mb-4 h-48 bg-stone-100 overflow-hidden relative border-b border-stone-200">
-                <img src="${r.imgUrl}" class="w-full h-full object-cover" alt="${r.name}">
+                <img src="${r.imgUrl}" class="w-full h-full object-cover" loading="lazy" decoding="async" alt="${r.name}">
             </div>`;
         }
 
@@ -3192,7 +3192,7 @@ window.renderInventory = () => {
     }
 
     container.innerHTML = html;
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 
@@ -3375,7 +3375,7 @@ window.renderFinance = () => {
     }
     
     tbody.innerHTML = html;
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
     
     // Update active state of sort buttons if they exist
     const btns = document.querySelectorAll('.finance-sort-btn');
@@ -3639,7 +3639,7 @@ window.renderRecipeIngredients = () => {
     window.currentRecipeGrandTotal = grandTotal;
     if(window.calculateRecipeProfit) window.calculateRecipeProfit();
     
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };window.openRecipeIngredientModal = () => {
     try {
         const select = document.getElementById('recipe-inv-select');
@@ -3874,7 +3874,7 @@ window.renderB2BAgenda = () => {
     }
     
     customerListEl.innerHTML = html;
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
     
     // If there is an active customer, re-render their page
     if(activeB2BCustomerId) {
@@ -3993,7 +3993,7 @@ window.selectB2BCustomer = (customerId) => {
     html += `</div>`; // end scroll area
     
     pageEl.innerHTML = html;
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 window.openB2BModal = (type = 'BORC', customerId = null) => {
@@ -4361,7 +4361,7 @@ window.renderExpenses = () => {
     });
     
     tbody.innerHTML = html;
-    if(window.lucide) window.lucide.createIcons();
+    if(window.lucide) setTimeout(() => window.lucide.createIcons(), 0);
     
     // Update dashboard stat if on HOME
     const dashStat = document.getElementById('home-stat-expenses');
@@ -4591,7 +4591,7 @@ window.renderInventoryRequests = () => {
     
     html += `</div></div>`;
     panel.innerHTML = html;
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 window.openInventoryRequestModal = (invId) => {
@@ -4702,7 +4702,7 @@ window.renderCriticalStockPanel = () => {
     
     html += `</div></div>`;
     panel.innerHTML = html;
-    if(typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
 };
 
 
