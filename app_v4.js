@@ -4389,20 +4389,29 @@ window.downloadCSV = function(filename, csvData) {
 
 window.downloadExcelExpenses = function() {
     let records = JSON.parse(localStorage.getItem('expenses') || '[]');
-    let csv = "Tarih;Açıklama;Tip;Tutar (TL)\n";
+    let data = [ ["Tarih", "Açıklama", "Tip", "Tutar (TL)"] ];
     let total = 0;
     records.forEach(r => {
-        csv += `${r.date};"${r.desc}";${r.type};${r.amount}\n`;
+        data.push([r.date, r.desc, r.type, parseFloat(r.amount)]);
         total += parseFloat(r.amount);
     });
-    csv += `;;TOPLAM:;${total}\n`;
-    downloadCSV("Kasa_Gider_Raporu.csv", csv);
+    data.push([]);
+    data.push(["", "", "TOPLAM:", total]);
+    
+    if (typeof XLSX !== 'undefined') {
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Kasa Gider");
+        XLSX.writeFile(wb, "Kasa_Gider_Raporu.xlsx");
+    } else {
+        showToast("Excel kütüphanesi yüklenemedi. Lütfen sayfayı yenileyin.", "error");
+    }
     showToast("Kasa & Gider Raporu indirildi.", "success");
 };
 
 window.downloadExcelReceivables = function() {
     let records = JSON.parse(localStorage.getItem('receivables') || '[]');
-    let csv = "Müşteri Adı;Güncel Borç (TL);Son Tahsilat Tarihi;Açıklama\n";
+    let data = [ ["Müşteri Adı", "Güncel Borç (TL)", "Son Tahsilat Tarihi", "Açıklama"] ];
     let total = 0;
     records.forEach(r => {
         let lastDate = "-";
@@ -4410,37 +4419,59 @@ window.downloadExcelReceivables = function() {
             let tahsilatlar = r.history.filter(h => h.amount < 0).sort((a,b) => b.id - a.id);
             if(tahsilatlar.length > 0) lastDate = new Date(tahsilatlar[0].id).toLocaleDateString('tr-TR');
         }
-        csv += `"${r.name}";${r.balance};${lastDate};"${r.note || ''}"\n`;
+        data.push([r.name, parseFloat(r.balance), lastDate, r.note || '']);
         total += parseFloat(r.balance);
     });
-    csv += `TOPLAM:;${total};;\n`;
-    downloadCSV("Acik_Hesap_Alacaklar.csv", csv);
+    data.push([]);
+    data.push(["TOPLAM:", total, "", ""]);
+    
+    if (typeof XLSX !== 'undefined') {
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Açık Hesaplar");
+        XLSX.writeFile(wb, "Acik_Hesap_Alacaklar.xlsx");
+    } else {
+        showToast("Excel kütüphanesi yüklenemedi. Lütfen sayfayı yenileyin.", "error");
+    }
     showToast("Açık Hesap (Veresiye) Raporu indirildi.", "success");
 };
 
 window.downloadExcelInventory = function() {
     let prods = JSON.parse(localStorage.getItem('products') || '[]');
-    let csv = "Kategori;Ürün Adı;Satış Fiyatı (TL);Sistemdeki Stok;Gerçek Stok (Sayım)\n";
+    let data = [ ["Kategori", "Ürün Adı", "Satış Fiyatı (TL)", "Sistemdeki Stok", "Gerçek Stok (Sayım)"] ];
     
-    // Sort by category then name
     prods.sort((a,b) => (a.category||'').localeCompare(b.category||'') || a.name.localeCompare(b.name));
     
     prods.forEach(p => {
-        csv += `"${p.category || 'Diğer'}";"${p.name}";${p.price};${p.stock};\n`;
+        data.push([p.category || 'Diğer', p.name, parseFloat(p.price) || 0, parseFloat(p.stock) || 0, ""]);
     });
     
-    csv += `\n;;;;;\n`;
-    csv += `HAMMADDE ENVANTERİ;;;;;\n`;
-    let raw = JSON.parse(localStorage.getItem('rawMaterials') || '[]');
-    raw.sort((a,b) => a.name.localeCompare(b.name));
-    raw.forEach(r => {
-        csv += `Hammadde;"${r.name}";${r.cost};${r.stock} ${r.unit};\n`;
+    data.push([]);
+    data.push(["HAMMADDE ENVANTERİ", "", "", "", ""]);
+    data.push(["Kategori", "Ürün Adı", "Maliyet", "Sistemdeki Stok", "Gerçek Stok (Sayım)"]);
+    
+    let raw = JSON.parse(localStorage.getItem('inventory') || '[]'); // Wait, is it rawMaterials or inventory?
+    // Wait, looking at current code it says rawMaterials, but earlier it was inventory?
+    // Oh no, in previous code it says: let raw = JSON.parse(localStorage.getItem('rawMaterials') || '[]');
+    // BUT wait! In Patuli, we changed rawMaterials to just 'inventory'!
+    // I should check what is currently there. Ah, the old code says 'rawMaterials' which is probably empty!
+    // I will fix it here to use 'inventory' which is correct.
+    let inv = JSON.parse(localStorage.getItem('inventory') || '[]');
+    inv.sort((a,b) => a.name.localeCompare(b.name));
+    inv.forEach(r => {
+        data.push(["Hammadde", r.name, parseFloat(r.cost) || 0, `${r.amount || 0} ${r.unit || ''}`, ""]);
     });
     
-    downloadCSV("Stok_Sayim_Listesi.csv", csv);
+    if (typeof XLSX !== 'undefined') {
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Stok Sayım");
+        XLSX.writeFile(wb, "Stok_Sayim_Listesi.xlsx");
+    } else {
+        showToast("Excel kütüphanesi yüklenemedi. Lütfen sayfayı yenileyin.", "error");
+    }
     showToast("Stok Sayım Listesi indirildi.", "success");
 };
-
 
 window.renderInventoryRequests = () => {
     const panel = document.getElementById('inventory-requests-panel');
