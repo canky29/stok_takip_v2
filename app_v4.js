@@ -1735,10 +1735,12 @@ window.renderProducts = () => {
                         <div class="flex justify-between items-center">
                             <div class="flex flex-col">
                                 <span class="text-[10px] text-stone-400 font-extrabold uppercase mb-1">STOK (${p.unit.toUpperCase()})</span>
-                                <div class="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl p-1 w-fit">
+                                <div class="flex items-center gap-1.5 bg-stone-50 border border-stone-200 rounded-xl p-1 w-fit">
                                     <button onclick="updateProduct(${p.id}, 'stock', -1)" class="w-7 h-7 rounded-lg hover:bg-stone-200 font-bold text-stone-600 flex items-center justify-center">-</button>
-                                    <span class="text-sm font-black text-stone-800 min-w-[3rem] text-center">${p.stock} ${p.unit}</span>
+                                    <span class="text-sm font-black text-stone-800 min-w-[2.5rem] text-center">${p.stock} ${p.unit}</span>
                                     <button onclick="updateProduct(${p.id}, 'stock', 1)" class="w-7 h-7 rounded-lg hover:bg-stone-200 font-bold text-stone-600 flex items-center justify-center">+</button>
+                                    <div class="w-px h-6 bg-stone-300 mx-0.5"></div>
+                                    <button onclick="openTareModalForProduct(${p.id})" class="w-7 h-7 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold flex items-center justify-center transition" title="Daralı/Tepsili Stok Ekle"><i data-lucide="scale" class="w-3.5 h-3.5"></i></button>
                                 </div>
                             </div>
                             <div class="w-10 h-10 rounded-full border-4 ${circleColor} flex items-center justify-center font-black text-[10px]">
@@ -4806,16 +4808,14 @@ const _renderCustOrderCalendar = (container, list) => {
 
 
 // --- TARE (DARALI GİRİŞ) MODAL LOGIC ---
-window.openTareModal = () => {
-    // Populate product dropdown
-    const select = document.getElementById('tare-product-select');
-    select.innerHTML = '<option value="">-- Ürün Seçiniz --</option>';
-    
+window.openTareModalForProduct = (id) => {
     let prods = JSON.parse(localStorage.getItem('products') || '[]');
-    // Only sort and filter for easier finding
-    prods.sort((a,b) => a.name.localeCompare(b.name)).forEach(p => {
-        select.innerHTML += `<option value="${p.id}">${p.name} (${p.unit}) - Kategori: ${p.category}</option>`;
-    });
+    let p = prods.find(x => String(x.id) === String(id));
+    if(!p) return;
+    
+    document.getElementById('tare-product-name').textContent = p.name;
+    document.getElementById('tare-product-unit').textContent = p.unit.toUpperCase();
+    document.getElementById('tare-product-id').value = p.id;
     
     document.getElementById('tare-empty-weight').value = '';
     document.getElementById('tare-gross-weight').value = '';
@@ -4849,7 +4849,7 @@ window.calcTareNet = () => {
 
 window.submitTareForm = (e) => {
     e.preventDefault();
-    const prodId = document.getElementById('tare-product-select').value;
+    const prodId = document.getElementById('tare-product-id').value;
     const empty = parseFloat(document.getElementById('tare-empty-weight').value);
     const gross = parseFloat(document.getElementById('tare-gross-weight').value);
     
