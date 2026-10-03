@@ -2246,7 +2246,7 @@
         </div>
     </div>
 
-    <script src="app_v4.js?v=1791034139"></script>
+    <script src="app_v4.js?v=1791034525"></script>
     <script type="module" src="firebase_sync.js"></script>
 
     <!-- Unified Confirm Modal -->
@@ -2487,18 +2487,18 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-2">Boş Tepsi Ağırlığı (Dara) - Gram</label>
+                            <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-2">Boş Tepsi Ağırlığı (Dara)</label>
                             <div class="relative">
-                                <input type="number" id="tare-empty-weight" required min="1" step="0.01" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-lg font-black text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder="Örn: 450" oninput="window.calcTareNet()">
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 font-black">Gr</span>
+                                <input type="number" id="tare-empty-weight" required min="0" step="0.001" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-lg font-black text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder="Örn: 0.450" oninput="window.calcTareNet()">
+                                <span id="tare-empty-unit" class="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 font-black">Kg</span>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-2">Brüt Ağırlık (Tepsi + Ürün) - Gram</label>
+                            <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-2">Brüt Ağırlık (Tepsi + Ürün)</label>
                             <div class="relative">
-                                <input type="number" id="tare-gross-weight" required min="1" step="0.01" class="w-full bg-rose-50 border border-rose-200 rounded-xl py-3 px-4 text-xl font-black text-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 transition" placeholder="Örn: 1500" oninput="window.calcTareNet()">
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-rose-400 font-black">Gr</span>
+                                <input type="number" id="tare-gross-weight" required min="0" step="0.001" class="w-full bg-rose-50 border border-rose-200 rounded-xl py-3 px-4 text-xl font-black text-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 transition" placeholder="Örn: 2.5" oninput="window.calcTareNet()">
+                                <span id="tare-gross-unit" class="absolute right-4 top-1/2 -translate-y-1/2 text-rose-400 font-black">Kg</span>
                             </div>
                         </div>
 

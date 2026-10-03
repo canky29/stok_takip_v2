@@ -1158,6 +1158,11 @@ window.updateProduct = (id, field, delta) => {
             p.totalEntered = (p.stock || 0) + (p.sales || 0) + (p.waste || 0);
         }
         
+        p.stock = parseFloat(p.stock) || 0;
+        p.sales = parseFloat(p.sales) || 0;
+        p.waste = parseFloat(p.waste) || 0;
+        p.maxStock = parseFloat(p.maxStock) || 1;
+        
         const prevStock = p.stock;
         
         if(field === 'stock') {
@@ -4833,9 +4838,26 @@ window.openTareModalForProduct = (id) => {
     document.getElementById('tare-product-unit').textContent = p.unit.toUpperCase();
     document.getElementById('tare-product-id').value = p.id;
     
+    let unitStr = p.unit.charAt(0).toUpperCase() + p.unit.slice(1).toLowerCase();
+    
     let unitSpan = document.getElementById('tare-net-result-unit');
-    if(unitSpan) {
-        unitSpan.textContent = p.unit.toLowerCase() === 'kg' ? 'Kg' : 'Gr';
+    if(unitSpan) unitSpan.textContent = unitStr;
+    
+    let emptyUnit = document.getElementById('tare-empty-unit');
+    if(emptyUnit) emptyUnit.textContent = unitStr;
+    
+    let grossUnit = document.getElementById('tare-gross-unit');
+    if(grossUnit) grossUnit.textContent = unitStr;
+    
+    let emptyInp = document.getElementById('tare-empty-weight');
+    let grossInp = document.getElementById('tare-gross-weight');
+    
+    if (unitStr === 'Kg') {
+        if(emptyInp) emptyInp.placeholder = "Örn: 0.450";
+        if(grossInp) grossInp.placeholder = "Örn: 2.5";
+    } else {
+        if(emptyInp) emptyInp.placeholder = "Örn: 450";
+        if(grossInp) grossInp.placeholder = "Örn: 2500";
     }
     
     document.getElementById('tare-empty-weight').value = '';
@@ -4861,12 +4883,7 @@ window.calcTareNet = () => {
         netEl.classList.add('text-rose-600');
         btn.disabled = true;
     } else {
-        let net = parseFloat((gross - empty).toFixed(2));
-        
-        let unit = document.getElementById('tare-product-unit').textContent.trim().toLowerCase();
-        if (unit === 'kg') {
-            net = (net / 1000).toFixed(3);
-        }
+        let net = parseFloat((gross - empty).toFixed(3));
         
         netEl.textContent = net;
         netEl.classList.remove('text-rose-600');
@@ -4889,15 +4906,11 @@ window.submitTareForm = (e) => {
         return;
     }
     
-    let net = parseFloat((gross - empty).toFixed(2));
+    let net = parseFloat((gross - empty).toFixed(3));
     
     let prods = JSON.parse(localStorage.getItem('products') || '[]');
     let p = prods.find(x => String(x.id) === String(prodId));
     if (!p) return;
-    
-    if (p.unit.toLowerCase() === 'kg') {
-        net = parseFloat((net / 1000).toFixed(3));
-    }
     
     // update stock directly to bypass maxStock limits in updateProduct
     p.stock = parseFloat((p.stock + net).toFixed(3));
@@ -4930,13 +4943,17 @@ window.setExactProductValue = (id, field, valStr) => {
     let p = prods.find(x => String(x.id) === String(id));
     if(!p) return;
     
+    p.stock = parseFloat(p.stock) || 0;
+    p.sales = parseFloat(p.sales) || 0;
+    p.waste = parseFloat(p.waste) || 0;
+    
     let delta = 0;
     if(field === 'stock') {
         delta = val - p.stock;
     } else if (field === 'sales') {
-        delta = val - (p.sales || 0);
+        delta = val - p.sales;
     } else if (field === 'waste') {
-        delta = val - (p.waste || 0);
+        delta = val - p.waste;
     }
     
     if (delta !== 0) {
