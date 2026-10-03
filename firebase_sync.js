@@ -26,6 +26,7 @@ const SYNC_KEYS = [
 ];
 
 function triggerRender() {
+    if(window.renderProducts) window.renderProducts();
     if(window.renderInventory) window.renderInventory();
     if(window.renderFinance) window.renderFinance();
     if(window.renderOrders) window.renderOrders();
