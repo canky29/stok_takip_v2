@@ -4703,7 +4703,13 @@ const _renderCustOrderCalendar = (container, list) => {
     });
     
     // Sort dates
-    const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
+    const sortedDates = Object.keys(grouped).sort((a, b) => {
+        const da = new Date(a);
+        const db = new Date(b);
+        if(isNaN(da)) return 1;
+        if(isNaN(db)) return -1;
+        return da - db;
+    });
     
     let html = '';
     
@@ -4713,16 +4719,20 @@ const _renderCustOrderCalendar = (container, list) => {
         let displayDate = dateStr;
         if(dateStr !== 'Tarihsiz') {
             const d = new Date(dateStr);
-            const today = new Date();
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
+            let dateLabel = dateStr;
             
-            const isToday = d.toDateString() === today.toDateString();
-            const isTomorrow = d.toDateString() === tomorrow.toDateString();
-            
-            let dateLabel = d.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
-            if (isToday) dateLabel = `<span class="bg-rose-500 text-white px-2 py-0.5 rounded-md text-xs uppercase tracking-wider ml-2 shadow-sm animate-pulse">Bugün</span> ` + dateLabel;
-            if (isTomorrow) dateLabel = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded-md text-xs uppercase tracking-wider ml-2 shadow-sm">Yarın</span> ` + dateLabel;
+            if (!isNaN(d)) {
+                const today = new Date();
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                const isToday = d.toDateString() === today.toDateString();
+                const isTomorrow = d.toDateString() === tomorrow.toDateString();
+                
+                dateLabel = d.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
+                if (isToday) dateLabel = `<span class="bg-rose-500 text-white px-2 py-0.5 rounded-md text-xs uppercase tracking-wider ml-2 shadow-sm animate-pulse">Bugün</span> ` + dateLabel;
+                if (isTomorrow) dateLabel = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded-md text-xs uppercase tracking-wider ml-2 shadow-sm">Yarın</span> ` + dateLabel;
+            }
             
             blockHtml += `<h3 class="text-2xl font-black text-stone-800 mb-6 flex items-center gap-2 border-b border-stone-200 pb-3"><i data-lucide="calendar-days" class="w-6 h-6 text-stone-400"></i> ${dateLabel}</h3>`;
         } else {
