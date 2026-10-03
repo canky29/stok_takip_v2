@@ -4768,10 +4768,7 @@ const _renderCustOrderCalendar = (container, list) => {
                         </div>
                     </div>
                     
-                    <div class="hidden sm:flex flex-col items-end justify-center px-4 border-l border-stone-100 mr-2">
-                        <div class="text-xl font-black text-stone-800">${o.price ? o.price + ' ₺' : '-'}</div>
-                        <div class="text-[10px] font-black uppercase tracking-widest text-stone-400">Tutar</div>
-                    </div>
+                    <!-- Price hidden for bakery staff view -->
                 </div>
 
                 <div class="flex items-stretch justify-end gap-2 sm:border-l sm:border-stone-100 sm:pl-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-stone-100 mt-2 sm:mt-0">
