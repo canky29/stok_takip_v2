@@ -1162,18 +1162,34 @@ window.updateProduct = (id, field, delta) => {
         
         if(field === 'stock') {
             if(p.stock + delta >= 0 && p.stock + delta <= p.maxStock) {
-                p.stock += delta;
+                p.stock = parseFloat((p.stock + delta).toFixed(3));
                 if(delta > 0) {
-                    p.totalEntered += delta;
-                    p.history[today].entered = (p.history[today].entered || 0) + delta;
+                    p.totalEntered = parseFloat(((p.totalEntered || 0) + delta).toFixed(3));
+                    p.history[today].entered = parseFloat(((p.history[today].entered || 0) + delta).toFixed(3));
                 }
             }
         } else if(field === 'sales') {
-            if(delta > 0 && p.stock >= 1) { p.sales += 1; p.stock -= 1; p.history[today].sales++; }
-            else if(delta < 0 && p.sales >= 1) { p.sales -= 1; p.stock += 1; p.history[today].sales = Math.max(0, p.history[today].sales - 1); }
+            if(delta > 0 && p.stock >= delta) { 
+                p.sales = parseFloat(((p.sales || 0) + delta).toFixed(3)); 
+                p.stock = parseFloat((p.stock - delta).toFixed(3)); 
+                p.history[today].sales = parseFloat(((p.history[today].sales || 0) + delta).toFixed(3)); 
+            }
+            else if(delta < 0 && p.sales >= Math.abs(delta)) { 
+                p.sales = parseFloat(((p.sales || 0) + delta).toFixed(3)); 
+                p.stock = parseFloat((p.stock - delta).toFixed(3)); 
+                p.history[today].sales = Math.max(0, parseFloat(((p.history[today].sales || 0) + delta).toFixed(3))); 
+            }
         } else if(field === 'waste') {
-            if(delta > 0 && p.stock >= 1) { p.waste += 1; p.stock -= 1; p.history[today].waste++; }
-            else if(delta < 0 && p.waste >= 1) { p.waste -= 1; p.stock += 1; p.history[today].waste = Math.max(0, p.history[today].waste - 1); }
+            if(delta > 0 && p.stock >= delta) { 
+                p.waste = parseFloat(((p.waste || 0) + delta).toFixed(3)); 
+                p.stock = parseFloat((p.stock - delta).toFixed(3)); 
+                p.history[today].waste = parseFloat(((p.history[today].waste || 0) + delta).toFixed(3)); 
+            }
+            else if(delta < 0 && p.waste >= Math.abs(delta)) { 
+                p.waste = parseFloat(((p.waste || 0) + delta).toFixed(3)); 
+                p.stock = parseFloat((p.stock - delta).toFixed(3)); 
+                p.history[today].waste = Math.max(0, parseFloat(((p.history[today].waste || 0) + delta).toFixed(3))); 
+            }
         }
         
         const prevPct = (prevStock / (p.maxStock || 1));
@@ -1737,7 +1753,7 @@ window.renderProducts = () => {
                                 <span class="text-[10px] text-stone-400 font-extrabold uppercase mb-1">STOK (${p.unit.toUpperCase()})</span>
                                 <div class="flex items-center gap-1.5 bg-stone-50 border border-stone-200 rounded-xl p-1 w-fit">
                                     <button onclick="updateProduct(${p.id}, 'stock', -1)" class="w-7 h-7 rounded-lg hover:bg-stone-200 font-bold text-stone-600 flex items-center justify-center">-</button>
-                                    <span class="text-sm font-black text-stone-800 min-w-[2.5rem] text-center">${p.stock} ${p.unit}</span>
+                                    <input type="number" step="0.001" value="${p.stock}" onchange="setExactProductValue(${p.id}, 'stock', this.value)" class="text-sm font-black text-stone-800 w-16 text-center bg-transparent border-b-2 border-dashed border-stone-300 focus:outline-none focus:border-amber-500 p-0 m-0" title="Tam değeri elinizle yazabilirsiniz"> <span class="text-xs font-bold text-stone-800 ml-1">${p.unit}</span>
                                     <button onclick="updateProduct(${p.id}, 'stock', 1)" class="w-7 h-7 rounded-lg hover:bg-stone-200 font-bold text-stone-600 flex items-center justify-center">+</button>
                                     <div class="w-px h-6 bg-stone-300 mx-0.5"></div>
                                     <button onclick="openTareModalForProduct(${p.id})" class="w-7 h-7 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold flex items-center justify-center transition" title="Daralı/Tepsili Stok Ekle"><i data-lucide="scale" class="w-3.5 h-3.5"></i></button>
@@ -1752,7 +1768,7 @@ window.renderProducts = () => {
                                 <span class="text-[10px] font-bold text-stone-500">Satış:</span>
                                 <div class="flex items-center gap-1">
                                     <button onclick="updateProduct(${p.id}, 'sales', -1)" class="w-5 h-5 bg-stone-200 rounded text-[10px] font-bold hover:bg-stone-300">-</button>
-                                    <span class="text-xs font-black min-w-[1rem] text-center text-emerald-700">${p.sales}</span>
+                                    <input type="number" step="0.001" value="${p.sales || 0}" onchange="setExactProductValue(${p.id}, 'sales', this.value)" class="text-xs font-black w-12 text-center text-emerald-700 bg-transparent border-b border-dashed border-emerald-300 focus:outline-none focus:border-emerald-500 p-0 m-0" title="Satış miktarını elinizle yazabilirsiniz">
                                     <button onclick="updateProduct(${p.id}, 'sales', 1)" class="w-5 h-5 bg-emerald-600 text-white rounded text-[10px] font-bold hover:bg-emerald-700">+</button>
                                 </div>
                             </div>
@@ -1760,7 +1776,7 @@ window.renderProducts = () => {
                                 <span class="text-[10px] font-bold text-stone-500">Fire:</span>
                                 <div class="flex items-center gap-1">
                                     <button onclick="updateProduct(${p.id}, 'waste', -1)" class="w-5 h-5 bg-stone-200 rounded text-[10px] font-bold hover:bg-stone-300">-</button>
-                                    <span class="text-xs font-black min-w-[1rem] text-center text-rose-700">${p.waste}</span>
+                                    <input type="number" step="0.001" value="${p.waste || 0}" onchange="setExactProductValue(${p.id}, 'waste', this.value)" class="text-xs font-black w-12 text-center text-rose-700 bg-transparent border-b border-dashed border-rose-300 focus:outline-none focus:border-rose-500 p-0 m-0" title="Fire miktarını elinizle yazabilirsiniz">
                                     <button onclick="updateProduct(${p.id}, 'waste', 1)" class="w-5 h-5 bg-rose-600 text-white rounded text-[10px] font-bold hover:bg-rose-700">+</button>
                                 </div>
                             </div>
@@ -4894,4 +4910,27 @@ window.submitTareForm = (e) => {
     showToast(`${p.name} stoklarına NET ${net} ${p.unit} eklendi! (Brüt: ${gross} - Dara: ${empty})`, 'success');
     
     window.closeModal('tare-modal');
+};
+
+
+window.setExactProductValue = (id, field, valStr) => {
+    let val = parseFloat(valStr);
+    if(isNaN(val)) return;
+    
+    let prods = JSON.parse(localStorage.getItem('products') || '[]');
+    let p = prods.find(x => String(x.id) === String(id));
+    if(!p) return;
+    
+    let delta = 0;
+    if(field === 'stock') {
+        delta = val - p.stock;
+    } else if (field === 'sales') {
+        delta = val - (p.sales || 0);
+    } else if (field === 'waste') {
+        delta = val - (p.waste || 0);
+    }
+    
+    if (delta !== 0) {
+        window.updateProduct(id, field, delta);
+    }
 };
