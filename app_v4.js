@@ -2469,10 +2469,13 @@ const _renderCustOrderGrid = (container, list, isActive) => {
     let html = '';
     list.sort((a,b) => b.id - a.id).forEach(o => {
         const dateStr = o.date ? new Date(o.date).toLocaleDateString('tr-TR') : '';
-        let waText = `Sayın ${o.customerName},\n`;
-        waText += `*${o.productName}*`;
+        let waText = `Sayın ${o.customerName},\n\n`;
+        waText += `Büyük bir özenle hazırladığımız *${o.productName}*`;
         if (o.cakeContent) waText += ` (${o.cakeContent})`;
-        waText += ` siparişiniz özenle hazırlanmıştır. Dilediğiniz zaman fırınımızdan veya işletmemizden teslim alabilirsiniz.\n\nFırın iletişim numarası: +90 551 726 53 53\nFırının konumu: https://maps.app.goo.gl/5mfXWVdFp6vxaio3A`;
+        waText += ` siparişiniz teslimata hazırdır. Ürününüzü dilediğiniz zaman işletmemizden teslim alabilirsiniz.\n\n`;
+        waText += `Bizi tercih ettiğiniz için teşekkür ederiz.\n\n`;
+        waText += `İletişim: +90 551 726 53 53\n`;
+        waText += `📍 Konum: https://maps.app.goo.gl/5mfXWVdFp6vxaio3A`;
 
         
         html += `
