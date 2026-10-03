@@ -387,7 +387,7 @@ window.renderPersonnelRecords = () => {
         homeStat.innerText = `${allRecords.length} Avans / Gider`;
     }
     
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 
@@ -875,7 +875,7 @@ window.showToast = (message, type = 'success') => {
     
     container.appendChild(toast);
     
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
     
     // Ekrana giriş animasyonunu başlat
     requestAnimationFrame(() => {
@@ -904,7 +904,7 @@ window.openConfirmModal = (title, desc, confirmText, callback) => {
     const content = document.getElementById('confirm-modal-content');
     modal.classList.remove('hidden');
     setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.closeConfirmModal = () => {
@@ -928,7 +928,7 @@ window.updateDashboard = () => {
     let criticalCount = 0;
     prods.forEach(p => {
         const pct = Math.min(100, Math.round((p.stock / (p.maxStock || 1)) * 100));
-        if(pct <= 20) criticalCount++;
+        if(pct < 20) criticalCount++;
     });
     
     const e1 = document.getElementById('stat-total-products'); if(e1) e1.textContent = prods.length;
@@ -1053,7 +1053,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.classList.add('hidden', 'opacity-0', 'pointer-events-none');
     }
 
-    if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     initData();
     renderCategoriesSelect();
     renderProducts();
@@ -1357,7 +1357,7 @@ window.renderOrders = () => {
     let orders = JSON.parse(localStorage.getItem('orders') || '[]');
     if(orders.length === 0) {
         container.innerHTML = `<div class="col-span-full text-center py-10 text-stone-500 font-bold"><i data-lucide="coffee" class="w-10 h-10 mx-auto mb-3 opacity-50"></i>Şu an bekleyen imalat siparişi yok.</div>`;
-        if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+        if(typeof lucide !== 'undefined') lucide.createIcons();
         return;
     }
     
@@ -1384,7 +1384,7 @@ window.renderOrders = () => {
         `;
     });
     container.innerHTML = html;
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 
@@ -1668,11 +1668,11 @@ window.renderProducts = () => {
     
     // Apply stock filter
     if (currentFilter === 'CRITICAL') {
-        prods = prods.filter(p => p.stock > 0 && p.stock < (p.maxStock * 0.2));
+        prods = prods.filter(p => p.stock > 0 && p.stock < ((p.maxStock || 1) * 0.2));
     } else if (currentFilter === 'EMPTY') {
         prods = prods.filter(p => p.stock <= 0);
     } else if (currentFilter === 'NORMAL') {
-        prods = prods.filter(p => p.stock >= (p.maxStock * 0.2));
+        prods = prods.filter(p => p.stock >= ((p.maxStock || 1) * 0.2));
     }
     
     // Apply search filter
@@ -1734,12 +1734,12 @@ window.renderProducts = () => {
             items.forEach(p => {
                 const pct = Math.min(100, Math.round((p.stock / (p.maxStock || 1)) * 100));
                 const isZero = p.stock <= 0;
-                const isLow = p.stock < (p.maxStock * 0.2);
+                const isLow = p.stock < ((p.maxStock || 1) * 0.2);
                 
                 // Dynamic colors for the circle based on percentage
                 let circleColor = 'border-emerald-100 text-emerald-500';
                 if(pct <= 0) circleColor = 'border-rose-100 text-rose-600';
-                else if(pct <= 20) circleColor = 'border-rose-300 text-rose-600';
+                else if(pct < 20) circleColor = 'border-rose-300 text-rose-600';
                 else if(pct <= 50) circleColor = 'border-orange-200 text-orange-500';
                 else if(pct <= 75) circleColor = 'border-amber-200 text-amber-500';
                 else circleColor = 'border-emerald-100 text-emerald-500';
@@ -1747,7 +1747,7 @@ window.renderProducts = () => {
                 catHtml += `
                 <div class="bg-white rounded-3xl overflow-hidden shadow-lg border border-stone-200/60 hover:shadow-xl transition flex flex-col relative group/card">
                     <div class="relative h-48 w-full group">
-                        <img src="${p.image}" class="w-full h-full object-cover" loading="lazy" decoding="async" />
+                        <img src="${p.image}" class="w-full h-full object-cover"  />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         
                         <!-- Badges -->
@@ -1831,7 +1831,7 @@ window.renderProducts = () => {
         catHtml += `</div></div>`;
         container.innerHTML += catHtml;
     }
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.setRole = (role, bypassAuth = false) => {
@@ -1936,7 +1936,7 @@ if(role === 'RECIPE') {
         window.renderRecipeView();
     }
     
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 let currentSlide = 0;
@@ -2193,7 +2193,7 @@ window.renderAnalyticsFloor = () => {
         html = `<div class="text-center py-10 text-stone-500 font-bold bg-stone-50 rounded-xl border border-stone-200">Hiç kayıt bulunamadı.</div>`;
     }
     container.innerHTML = html;
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 
@@ -2262,7 +2262,7 @@ window.openCustomerOrderModal = (id = null) => {
     }
     
     window.openModal('customer-order-modal');
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.closeCustomerOrderModal = () => {
@@ -2476,13 +2476,13 @@ window.toggleFinanceReveal = () => {
     if(window.isFinanceRevealed) {
         window.isFinanceRevealed = false;
         document.getElementById('finance-reveal-icon').setAttribute('data-lucide', 'eye');
-        if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+        if(typeof lucide !== 'undefined') lucide.createIcons();
         window.renderCustomerOrders();
     } else {
         window.pendingActionCallback = () => {
             window.isFinanceRevealed = true;
             document.getElementById('finance-reveal-icon').setAttribute('data-lucide', 'eye-off');
-            if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+            if(typeof lucide !== 'undefined') lucide.createIcons();
             window.renderCustomerOrders();
         };
         window.setRole('ACTION_REVEAL');
@@ -2539,7 +2539,7 @@ window.renderCustomerOrders = () => {
             _renderCustOrderGrid(delContainer, delivOrders, false);
         }
     }
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 const _renderCustOrderGrid = (container, list, isActive) => {
@@ -2761,7 +2761,7 @@ window.renderReceivables = () => {
     
     if(displayList.length === 0) {
         container.innerHTML = `<div class="col-span-full text-center py-12 text-stone-500 font-bold bg-white rounded-3xl border border-stone-200 shadow-sm flex flex-col items-center justify-center gap-2"><i data-lucide="wallet" class="w-10 h-10 text-stone-300"></i>Kayıt bulunamadı.</div>`;
-        if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+        if(typeof lucide !== 'undefined') lucide.createIcons();
         return;
     }
     
@@ -2812,7 +2812,7 @@ window.renderReceivables = () => {
         `;
     });
     container.innerHTML = html;
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.openReceivableModal = () => {
@@ -3083,7 +3083,7 @@ window.renderInventory = () => {
         let imgHtml = '';
         if (r.imgUrl) {
             imgHtml = `<div class="-mx-6 -mt-6 mb-4 h-48 bg-stone-100 overflow-hidden relative border-b border-stone-200">
-                <img src="${r.imgUrl}" class="w-full h-full object-cover" loading="lazy" decoding="async" alt="${r.name}">
+                <img src="${r.imgUrl}" class="w-full h-full object-cover"  alt="${r.name}">
             </div>`;
         }
 
@@ -3219,7 +3219,7 @@ window.renderInventory = () => {
     }
 
     container.innerHTML = html;
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 
@@ -3402,7 +3402,7 @@ window.renderFinance = () => {
     }
     
     tbody.innerHTML = html;
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
     
     // Update active state of sort buttons if they exist
     const btns = document.querySelectorAll('.finance-sort-btn');
@@ -3666,7 +3666,7 @@ window.renderRecipeIngredients = () => {
     window.currentRecipeGrandTotal = grandTotal;
     if(window.calculateRecipeProfit) window.calculateRecipeProfit();
     
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };window.openRecipeIngredientModal = () => {
     try {
         const select = document.getElementById('recipe-inv-select');
@@ -3901,7 +3901,7 @@ window.renderB2BAgenda = () => {
     }
     
     customerListEl.innerHTML = html;
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
     
     // If there is an active customer, re-render their page
     if(activeB2BCustomerId) {
@@ -4020,7 +4020,7 @@ window.selectB2BCustomer = (customerId) => {
     html += `</div>`; // end scroll area
     
     pageEl.innerHTML = html;
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.openB2BModal = (type = 'BORC', customerId = null) => {
@@ -4388,7 +4388,7 @@ window.renderExpenses = () => {
     });
     
     tbody.innerHTML = html;
-    if(window.lucide) setTimeout(() => window.lucide.createIcons(), 0);
+    if(window.lucide) window.lucide.createIcons();
     
     // Update dashboard stat if on HOME
     const dashStat = document.getElementById('home-stat-expenses');
@@ -4618,7 +4618,7 @@ window.renderInventoryRequests = () => {
     
     html += `</div></div>`;
     panel.innerHTML = html;
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.openInventoryRequestModal = (invId) => {
@@ -4729,7 +4729,7 @@ window.renderCriticalStockPanel = () => {
     
     html += `</div></div>`;
     panel.innerHTML = html;
-    if(typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 0);
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 
@@ -5035,12 +5035,7 @@ window.hardResetProduct = (id) => {
                 p.waste = 0;
                 p.totalEntered = 0;
                 
-                const today = new Date().toISOString().split('T')[0];
-                if(p.history && p.history[today]) {
-                    p.history[today].entered = 0;
-                    p.history[today].sales = 0;
-                    p.history[today].waste = 0;
-                }
+                p.history = {}; // Geçmişin tamamını sıfırla ki analiz tablosu da sıfırlansın
                 
                 localStorage.setItem('products', JSON.stringify(prods));
                 renderProducts();
